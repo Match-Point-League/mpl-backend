@@ -28,21 +28,41 @@ export class Database {
    * - connectionTimeoutMillis: 2 seconds (timeout for establishing new connections)
    */
   private constructor() {
-    this.pool = new Pool({
+    // Configure SSL for production (Render) vs development
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    const poolConfig: any = {
       connectionString: databaseConfig.url,
-      host: databaseConfig.host,
-      port: databaseConfig.port,
-      database: databaseConfig.database,
-      user: databaseConfig.username,
-      password: databaseConfig.password,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 2000,
-    });
+      ssl: isProduction ? {
+        rejectUnauthorized: false,
+        require: true
+      } : false
+    };
 
-    this.pool.on('error', (err: Error) => {
+    // If individual connection params are provided, use them instead
+    if (!databaseConfig.url || databaseConfig.url === '') {
+      delete poolConfig.connectionString;
+      Object.assign(poolConfig, {
+        host: databaseConfig.host,
+        port: databaseConfig.port,
+        database: databaseConfig.database,
+        user: databaseConfig.username,
+        password: databaseConfig.password,
+      });
+    }
+
+    this.pool = new Pool(poolConfig);
+
+    this.pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
       process.exit(-1);
+    });
+
+    this.pool.on('connect', () => {
+      console.log('✅ Database client connected');
     });
   }
 
@@ -82,7 +102,7 @@ export class Database {
       const latency = Date.now() - start;
       return { connected: true, latency };
     } catch (error) {
-      console.error('Database connection test failed:', error);
+      console.error('❌ Database connection test failed:', error);
       return { connected: false };
     }
   }
