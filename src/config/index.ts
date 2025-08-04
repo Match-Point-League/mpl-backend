@@ -8,24 +8,6 @@ import { ServerConfig, DatabaseConfig } from '../types';
  * variables and providing typed configuration objects for the server and database.
  * It also validates required environment variables on startup to ensure the
  * application has all necessary configuration before starting.
- * 
- * Environment Variables:
- * 
- * Server Configuration:
- * - PORT: Server port (default: 8080)
- * - NODE_ENV: Environment mode (default: development)
- * - API_VERSION: API version prefix (default: v1)
- * - FRONTEND_URL: CORS origin for frontend (default: http://localhost:3000)
- * - RATE_LIMIT_WINDOW_MS: Rate limiting window in milliseconds (default: 900000)
- * - RATE_LIMIT_MAX_REQUESTS: Max requests per window (default: 100)
- * 
- * Database Configuration:
- * - DATABASE_URL: Full database connection string (optional, uses individual params if not provided)
- * - DB_HOST: Database host (default: localhost)
- * - DB_PORT: Database port (default: 5432)
- * - DB_NAME: Database name (default: match_point_league)
- * - DB_USER: Database username (required)
- * - DB_PASSWORD: Database password (required)
  */
 dotenv.config();
 
@@ -54,12 +36,27 @@ export const serverConfig: ServerConfig = {
  * @type {DatabaseConfig}
  */
 export const databaseConfig: DatabaseConfig = {
-  url: process.env.DATABASE_URL || '',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME || 'match_point_league',
-  username: process.env.DB_USER || '',
-  password: process.env.DB_PASSWORD || '',
+  production: {
+    connectionString: process.env.DATABASE_URL || '',
+    ssl: {
+      rejectUnauthorized: false,
+      require: true,
+    },
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  },
+  development: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    database: process.env.DB_NAME || 'match_point_league',
+    user: process.env.DB_USER || '',
+    password: process.env.DB_PASSWORD || '',
+    ssl: false,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  }
 };
 
 /**
@@ -70,15 +67,35 @@ export const databaseConfig: DatabaseConfig = {
  * configuration and provides clear error messages about what's missing.
  * 
  * Required variables:
+ * Development:
  * - DB_USER: Database username
  * - DB_PASSWORD: Database password  
  * - DB_NAME: Database name
+ * Production:
+ * - DATABASE_URL: Full database connection string
  * 
  * @throws {Error} When required environment variables are missing
  */
-const requiredEnvVars = ['DB_USER', 'DB_PASSWORD', 'DB_NAME'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+const validateDevelopmentEnv = (): void => {
+  const requiredEnvVars = ['DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+  const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
-if (missingEnvVars.length > 0) {
-  throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'production') {
+    console.warn(`⚠️  Warning: Missing environment variables: ${missingEnvVars.join(', ')}`);
+    console.warn('📝 Please check your .env file or refer to .env.example');
+  }
+};
+
+// Validate production environment
+const validateProductionEnv = (): void => {
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    throw new Error('❌ DATABASE_URL is required for production environment');
+  }
+};
+
+// Run validations
+if (process.env.NODE_ENV === 'production') {
+  validateProductionEnv();
+} else {
+  validateDevelopmentEnv();
 }

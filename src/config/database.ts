@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { databaseConfig } from './index';
+import { DatabaseEnvironment } from '../types';
 
 /**
  * Database connection manager using the Singleton pattern.
@@ -28,33 +29,7 @@ export class Database {
    * - connectionTimeoutMillis: 2 seconds (timeout for establishing new connections)
    */
   private constructor() {
-    // Configure SSL for production (Render) vs development
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    const poolConfig: any = {
-      connectionString: databaseConfig.url,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-      ssl: isProduction ? {
-        rejectUnauthorized: false,
-        require: true
-      } : false
-    };
-
-    // If individual connection params are provided, use them instead
-    if (!databaseConfig.url || databaseConfig.url === '') {
-      delete poolConfig.connectionString;
-      Object.assign(poolConfig, {
-        host: databaseConfig.host,
-        port: databaseConfig.port,
-        database: databaseConfig.database,
-        user: databaseConfig.username,
-        password: databaseConfig.password,
-      });
-    }
-
-    this.pool = new Pool(poolConfig);
+    this.pool = new Pool(databaseConfig[process.env.NODE_ENV as DatabaseEnvironment]);
 
     this.pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
