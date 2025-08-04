@@ -11,8 +11,13 @@
     "prebuild": "npm run clean",
     "watch": "tsc -w",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
-  },
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "migrate:create": "node_modules/.bin/node-pg-migrate create",
+    "migrate:up": "node_modules/.bin/node-pg-migrate up",
+    "migrate:down": "node_modules/.bin/node-pg-migrate down",
+    "migrate:status": "node_modules/.bin/node-pg-migrate status",
+    "migrate:up:prod": "NODE_ENV=production node_modules/.bin/node-pg-migrate up"
+ },
   "keywords": [
     "tennis",
     "pickleball",
@@ -21,7 +26,7 @@
   ],
   "author": "Ria Talwar",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/express-rate-limit": "^5.1.3",
     "@types/express-validator": "^2.20.33",
