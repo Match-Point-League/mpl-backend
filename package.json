@@ -12,12 +12,12 @@
     "watch": "tsc -w",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "migrate:create": "node_modules/.bin/node-pg-migrate create",
-    "migrate:up": "node_modules/.bin/node-pg-migrate up",
-    "migrate:down": "node_modules/.bin/node-pg-migrate down",
-    "migrate:status": "node_modules/.bin/node-pg-migrate status",
-    "migrate:up:prod": "NODE_ENV=production node_modules/.bin/node-pg-migrate up"
- },
+    "migrate:create": "node-pg-migrate create",
+    "migrate:up": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:status": "node-pg-migrate status",
+    "migrate:up:prod": "NODE_ENV=production node-pg-migrate up"
+  },
   "keywords": [
     "tennis",
     "pickleball",
