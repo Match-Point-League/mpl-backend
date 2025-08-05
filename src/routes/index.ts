@@ -14,6 +14,6 @@ router.use('/health', healthRoutes);
 router.use('/ping', healthRoutes);
 
 // Users routes
-router.use('/get-user-by-email', usersRoutes);
+router.use('/users', usersRoutes);
 
 export default router;

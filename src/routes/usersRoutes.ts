@@ -8,7 +8,7 @@ const router = Router();
  * Base path: /api/v1/health
  */
 
-// GET /api/v1/get-user-by-email
+// GET /api/v1/users/get-user-by-email?email=user@example.com
 // Email passed as a query parameter
 router.get('/get-user-by-email', UsersController.getUserByEmail);
 
