@@ -5,13 +5,9 @@ import { Pool } from 'pg';
 
 export class UsersController {
 
-  private db: Pool;
+  private static db: Pool = database.getPool();
 
-  constructor() {
-    this.db = database.getPool();
-  }
-
-  public async getUserByEmail(req: Request, res: Response): Promise<void> {
+  public static async getUserByEmail(req: Request, res: Response): Promise<void> {
     // Get the email from the request parameters
     const email = req.params.email;
 
