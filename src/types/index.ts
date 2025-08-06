@@ -42,22 +42,6 @@ export interface HealthCheckResponse {
 }
 
 /**
- * Database configuration parameters.
- * 
- * Contains all necessary connection parameters for PostgreSQL database.
- * Used by the database connection manager to establish and maintain
- * database connections.
- */
-export interface DatabaseConfig {
-  host: string;
-  port: number;
-  database: string;
-  username: string;
-  password: string;
-  url: string;
-}
-
-/**
  * Server configuration parameters.
  * 
  * Contains all server-related settings including port, environment,
@@ -71,3 +55,6 @@ export interface ServerConfig {
   rateLimitWindowMs: number;
   rateLimitMaxRequests: number;
 }
+
+export * from './databaseTypes';
+export * from './userTypes';
