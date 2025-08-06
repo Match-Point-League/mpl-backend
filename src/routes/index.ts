@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import healthRoutes from './healthRoutes';
+import usersRoutes from './usersRoutes';
 
 const router = Router();
 
@@ -12,10 +13,7 @@ const router = Router();
 router.use('/health', healthRoutes);
 router.use('/ping', healthRoutes);
 
-// Future route groups will be added here:
-// router.use('/auth', authRoutes);
-// router.use('/users', userRoutes);
-// router.use('/matches', matchRoutes);
-// router.use('/courts', courtRoutes);
+// Users routes
+router.use('/users', usersRoutes);
 
 export default router;

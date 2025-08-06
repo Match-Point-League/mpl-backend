@@ -12,12 +12,12 @@
     "watch": "tsc -w",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "migrate:create": "node_modules/.bin/node-pg-migrate create",
-    "migrate:up": "node_modules/.bin/node-pg-migrate up",
-    "migrate:down": "node_modules/.bin/node-pg-migrate down",
-    "migrate:status": "node_modules/.bin/node-pg-migrate status",
-    "migrate:up:prod": "NODE_ENV=production node_modules/.bin/node-pg-migrate up"
- },
+    "migrate:create": "node-pg-migrate create",
+    "migrate:up": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:status": "node-pg-migrate status",
+    "migrate:up:prod": "NODE_ENV=production node-pg-migrate up"
+  },
   "keywords": [
     "tennis",
     "pickleball",
@@ -30,11 +30,11 @@
     "@types/express-rate-limit": "^5.1.3",
     "@types/express-validator": "^2.20.33",
     "@types/node": "^22.0.0",
+    "@types/node-pg-migrate": "^2.3.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
-    "node-pg-migrate": "^8.0.3",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
@@ -52,6 +52,7 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
+    "node-pg-migrate": "^8.0.3",
     "pg": "^8.16.3"
   }
 }
