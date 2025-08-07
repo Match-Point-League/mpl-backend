@@ -1,4 +1,4 @@
-### Database Information
+# Database Information
 
 ## Users table
 
