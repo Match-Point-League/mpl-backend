@@ -45,7 +45,7 @@
 - `winner_id` (UUID, foreign key to users.id, nullable)
 - `created_by` (UUID, foreign key to users.id, not null)
 - `score_submitter_id` (UUID, foreign key to users.id, nullable)
-- `score_verified` (boolean, not null, default: false)
+- `score_approver_id` (UUID, foreign key to users.id, nullable)
 - `created_at` (timestamp with time zone, not null, default: now())
 - `updated_at` (timestamp with time zone, not null, default: now())
 
