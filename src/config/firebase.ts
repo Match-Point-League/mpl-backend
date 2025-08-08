@@ -1,5 +1,5 @@
 import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth, Auth } from 'firebase-admin/auth';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -50,7 +50,7 @@ const createServiceAccount = (): ServiceAccount | null => {
 
 // Initialize Firebase Admin SDK
 let app;
-let auth;
+let auth: Auth | undefined;
 
 try {
   validateFirebaseConfig();
