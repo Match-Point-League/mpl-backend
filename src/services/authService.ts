@@ -11,6 +11,10 @@ export class AuthService {
    */
   static async signUp(signUpData: SignUpRequest): Promise<SignUpResponse> {
     try {
+      if (!auth) {
+        throw new Error('Firebase authentication not configured');
+      }
+
       // 1. Create user in Firebase
       const firebaseUser = await auth.createUser({
         email: signUpData.email,
@@ -68,6 +72,10 @@ export class AuthService {
    */
   static async signIn(signInData: SignInRequest): Promise<SignInResponse> {
     try {
+      if (!auth) {
+        throw new Error('Firebase authentication not configured');
+      }
+
       // 1. Verify user exists in Firebase
       const firebaseUser = await auth.getUserByEmail(signInData.email);
 
@@ -114,6 +122,10 @@ export class AuthService {
    */
   static async verifyToken(idToken: string): Promise<FirebaseUser | null> {
     try {
+      if (!auth) {
+        throw new Error('Firebase authentication not configured');
+      }
+
       const decodedToken = await auth.verifyIdToken(idToken);
       return {
         uid: decodedToken.uid,
