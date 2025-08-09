@@ -29,7 +29,7 @@ export interface ValidationErrors {
   password?: string;
   fullName?: string;
   displayName?: string;
-  sportsInterested?: string;
+  preferredSports?: string;
   skillLevel?: string;
   zipCode?: string;
   general?: string;

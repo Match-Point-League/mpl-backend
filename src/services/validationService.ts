@@ -98,8 +98,8 @@ export class ValidationService {
     }
 
     // Sports interested validation
-    if (!formData.sportsInterested || formData.sportsInterested.length === 0) {
-      errors.sportsInterested = 'Please select at least one sport';
+    if (!formData.preferredSports || formData.preferredSports.length === 0) {
+      errors.preferredSports = 'Please select at least one sport';
     }
 
     // Skill level validation

@@ -9,7 +9,7 @@ export interface SignUpRequest {
   confirmPassword: string;
   fullName: string;
   displayName: string;
-  sportsInterested: string[];
+  preferredSports: string[];
   skillLevel: number;
   zipCode: string;
 }
@@ -24,7 +24,7 @@ export interface SignUpResponse {
     password?: string;
     fullName?: string;
     displayName?: string;
-    sportsInterested?: string;
+    preferredSports?: string;
     skillLevel?: string;
     zipCode?: string;
     confirmEmail?: string;

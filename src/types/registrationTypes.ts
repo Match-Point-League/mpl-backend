@@ -10,7 +10,7 @@ export interface RegistrationFormData {
   password: string;
   confirmPassword: string;
   displayName: string;
-  sportsInterested: string[];
+  preferredSports: string[];
   skillLevel: number;
   zipCode: string;
 }
