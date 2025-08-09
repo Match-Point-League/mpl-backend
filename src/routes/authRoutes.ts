@@ -12,4 +12,8 @@ const router = Router();
 // Handles user registration (sign-up)
 router.post('/signup', AuthController.signUp);
 
+// POST /api/v1/auth/signin
+// Handles user sign-in
+router.post('/signin', AuthController.signIn);
+
 export default router; 
