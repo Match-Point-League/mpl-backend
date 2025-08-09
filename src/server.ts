@@ -21,6 +21,23 @@ import database from './config/database';
  * - Exits process cleanly
  */
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (error) => {
+  console.error('❌ [CRITICAL] Uncaught Exception:', error);
+  console.error('📝 [CRITICAL] Error details:', {
+    name: error.name,
+    message: error.message,
+    stack: error.stack
+  });
+  // Don't exit immediately, let the server try to continue
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ [CRITICAL] Unhandled Promise Rejection:', reason);
+  console.error('📝 [CRITICAL] Promise:', promise);
+  // Don't exit immediately, let the server try to continue
+});
+
 /**
  * Starts the application server with proper initialization and error handling.
  * 
