@@ -21,28 +21,16 @@ export class AuthController {
       const result = await AuthService.signUp(formData);
 
       if (result.success) {
-        const response: ApiResponse<RegistrationResponse> = {
-          success: true,
-          message: result.message || 'Account created successfully',
-          data: result,
-          timestamp: new Date().toISOString(),
-        };
-        res.status(201).json(response);
+        res.status(201).json(result);
       } else {
         // Handle validation errors or other errors
         const statusCode = result.validationErrors ? 400 : 500;
-        const response: ApiResponse<RegistrationResponse> = {
-          success: false,
-          error: result.error || 'Failed to sign up user',
-          data: result,
-          timestamp: new Date().toISOString(),
-        };
-        res.status(statusCode).json(response);
+        res.status(statusCode).json(result);
       }
     } catch (error: any) {
       console.error('Signup error:', error);
       
-      const response: ApiResponse = {
+      const response = {
         success: false,
         error: 'Failed to sign up user',
         timestamp: new Date().toISOString(),
