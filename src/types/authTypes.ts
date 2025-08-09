@@ -12,7 +12,6 @@ export interface SignUpRequest {
   sportsInterested: string[];
   skillLevel: number;
   zipCode: string;
-  cityName?: string;
 }
 
 export interface SignUpResponse {

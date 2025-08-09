@@ -40,7 +40,7 @@ export class AuthService {
         skill_level: signUpData.skillLevel,
         preferred_sport: ValidationService.mapSportsToPreferredSport(signUpData.sportsInterested),
         is_competitive: false, // Default value
-        city: signUpData.cityName || '',
+        city: validationResult.cityInfo?.fullLocation || '',
         zip_code: signUpData.zipCode,
         allow_direct_contact: false, // Default value
       };

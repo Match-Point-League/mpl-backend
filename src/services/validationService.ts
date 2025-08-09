@@ -1,5 +1,11 @@
 import { SignUpRequest, PreferredSport} from '../types';
-import { ZipCodeService } from './zipCodeService';
+
+interface ZipCodeResponse {
+  places?: Array<{
+    'place name': string;
+    'state abbreviation': string;
+  }>;
+}
 
 export interface ValidationErrors {
   email?: string;
@@ -28,6 +34,50 @@ export interface ValidationResult {
  * Service for validating registration form data
  */
 export class ValidationService {
+  /**
+   * Validates ZIP code format
+   */
+  private static validateZipCodeFormat(zipCode: string): boolean {
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    return zipRegex.test(zipCode);
+  }
+
+  /**
+   * Fetches city and state information from a ZIP code
+   */
+  private static async getCityFromZipCode(zipCode: string): Promise<{ city: string; state: string; fullLocation: string } | null> {
+    if (!zipCode || zipCode.length !== 5) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(`https://api.zippopotam.us/US/${zipCode}`);
+      
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json() as ZipCodeResponse;
+      
+      if (!data.places || data.places.length === 0) {
+        return null;
+      }
+
+      const place = data.places[0];
+      const city = place['place name'];
+      const state = place['state abbreviation'];
+
+      return {
+        city,
+        state,
+        fullLocation: `${city}, ${state}`
+      };
+    } catch (error) {
+      console.error('Error fetching ZIP code data:', error);
+      return null;
+    }
+  }
+
   /**
    * Validates complete registration form data
    */
@@ -90,7 +140,7 @@ export class ValidationService {
     // ZIP code validation
     if (!formData.zipCode) {
       errors.zipCode = 'ZIP code is required';
-    } else if (!ZipCodeService.validateZipCodeFormat(formData.zipCode)) {
+    } else if (!this.validateZipCodeFormat(formData.zipCode)) {
       errors.zipCode = 'Please enter a valid ZIP code';
     }
 
@@ -104,8 +154,8 @@ export class ValidationService {
 
     // If ZIP code is valid, try to get city information
     let cityInfo = null;
-    if (formData.zipCode && ZipCodeService.validateZipCodeFormat(formData.zipCode)) {
-      cityInfo = await ZipCodeService.getCityFromZipCode(formData.zipCode);
+    if (formData.zipCode && this.validateZipCodeFormat(formData.zipCode)) {
+      cityInfo = await this.getCityFromZipCode(formData.zipCode);
     }
 
     return {
