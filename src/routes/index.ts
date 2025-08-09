@@ -20,7 +20,4 @@ router.use('/auth', authRoutes);
 // Users routes
 router.use('/users', usersRoutes);
 
-// Auth routes
-router.use('/auth', authRoutes);
-
 export default router;
