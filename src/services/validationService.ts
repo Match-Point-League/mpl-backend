@@ -1,34 +1,5 @@
 import { SignUpRequest, PreferredSport} from '../types';
-
-interface ZipCodeResponse {
-  places?: Array<{
-    'place name': string;
-    'state abbreviation': string;
-  }>;
-}
-
-export interface ValidationErrors {
-  email?: string;
-  password?: string;
-  fullName?: string;
-  displayName?: string;
-  sportsInterested?: string;
-  skillLevel?: string;
-  zipCode?: string;
-  general?: string;
-  confirmEmail?: string;
-  confirmPassword?: string;
-}
-
-export interface ValidationResult {
-  isValid: boolean;
-  errors: ValidationErrors;
-  cityInfo?: {
-    city: string;
-    state: string;
-    fullLocation: string;
-  };
-}
+import { ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult } from '../types/validationTypes';
 
 /**
  * Service for validating registration form data
@@ -45,7 +16,7 @@ export class ValidationService {
   /**
    * Fetches city and state information from a ZIP code
    */
-  private static async getCityFromZipCode(zipCode: string): Promise<{ city: string; state: string; fullLocation: string } | null> {
+  private static async getCityFromZipCode(zipCode: string): Promise<CityInfo | null> {
     if (!zipCode || zipCode.length !== 5) {
       return null;
     }
