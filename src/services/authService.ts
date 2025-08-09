@@ -11,6 +11,8 @@ export class AuthService {
    */
   static async signUp(signUpData: RegistrationFormData): Promise<RegistrationResponse> {
     let firebaseUser: any = null;
+    const startTime = Date.now();
+    const timeoutMs = 30000; // 30 second timeout for entire operation
     
     try {
       if (!auth) {
@@ -27,12 +29,8 @@ export class AuthService {
         };
       }
 
-      // 2. Create user in Firebase
-      firebaseUser = await auth.createUser({
-        email: signUpData.email,
-        password: signUpData.password,
-        displayName: signUpData.displayName,
-      });
+      // 2. Create user in Firebase with timeout
+      firebaseUser = await this.createFirebaseUserWithTimeout(signUpData, timeoutMs - (Date.now() - startTime));
 
       // 3. Prepare user data for PostgreSQL
       const userData: CreateUserInput = {
@@ -47,7 +45,7 @@ export class AuthService {
         allow_direct_contact: false, // Default value
       };
 
-      // 4. Store user profile in PostgreSQL
+      // 4. Store user profile in PostgreSQL with retry
       const fields = Object.keys(userData);
       const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
       const values = Object.values(userData);
@@ -55,10 +53,29 @@ export class AuthService {
       try {
         const result = await this.retryDatabaseInsert(fields, placeholders, values);
         
+        // 5. Verify data completeness after insert
+        const completenessCheck = await this.verifyDataCompleteness(firebaseUser.uid, userData);
+        
+        if (!completenessCheck.isComplete) {
+          console.warn('User created but with incomplete data:', {
+            firebaseUid: firebaseUser.uid,
+            email: signUpData.email,
+            missingFields: completenessCheck.missingFields
+          });
+          
+          // Still return success but flag incomplete data
+          return {
+            success: true,
+            message: 'User created successfully',
+            userId: firebaseUser.uid,
+            warning: 'Some profile information may be incomplete'
+          };
+        }
+        
         return {
           success: true,
           message: 'User created successfully',
-          userId: firebaseUser.uid,  // Return Firebase UID instead of PostgreSQL ID
+          userId: firebaseUser.uid,
         };
       } catch (dbError: any) {
         // Handle database-specific errors
@@ -183,6 +200,59 @@ export class AuthService {
    */
   private static sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Create Firebase user with timeout protection
+   */
+  private static async createFirebaseUserWithTimeout(signUpData: RegistrationFormData, timeoutMs: number): Promise<any> {
+    const firebasePromise = auth!.createUser({
+      email: signUpData.email,
+      password: signUpData.password,
+      displayName: signUpData.displayName,
+    });
+
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Firebase operation timed out')), timeoutMs);
+    });
+
+    return Promise.race([firebasePromise, timeoutPromise]);
+  }
+
+  /**
+   * Verify that all user data was stored correctly
+   */
+  private static async verifyDataCompleteness(firebaseUid: string, userData: CreateUserInput): Promise<{isComplete: boolean, missingFields: string[]}> {
+    try {
+      const result = await this.db.query(
+        'SELECT email, name, display_name, skill_level, preferred_sport, city, zip_code FROM users WHERE email = $1',
+        [userData.email]
+      );
+
+      if (result.rows.length === 0) {
+        return { isComplete: false, missingFields: ['all'] };
+      }
+
+      const storedData = result.rows[0];
+      const missingFields: string[] = [];
+
+      // Check each field for completeness
+      if (!storedData.email || storedData.email !== userData.email) missingFields.push('email');
+      if (!storedData.name || storedData.name !== userData.name) missingFields.push('name');
+      if (!storedData.display_name || storedData.display_name !== userData.display_name) missingFields.push('display_name');
+      if (!storedData.skill_level || storedData.skill_level !== userData.skill_level) missingFields.push('skill_level');
+      if (!storedData.preferred_sport || storedData.preferred_sport !== userData.preferred_sport) missingFields.push('preferred_sport');
+      if (!storedData.city || storedData.city !== userData.city) missingFields.push('city');
+      if (!storedData.zip_code || storedData.zip_code !== userData.zip_code) missingFields.push('zip_code');
+
+      return {
+        isComplete: missingFields.length === 0,
+        missingFields
+      };
+    } catch (error) {
+      console.error('Error verifying data completeness:', error);
+      return { isComplete: false, missingFields: ['verification_failed'] };
+    }
   }
 
   /**
