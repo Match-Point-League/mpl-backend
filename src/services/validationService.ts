@@ -10,6 +10,8 @@ export interface ValidationErrors {
   skillLevel?: string;
   zipCode?: string;
   general?: string;
+  confirmEmail?: string;
+  confirmPassword?: string;
 }
 
 export interface ValidationResult {
@@ -47,6 +49,13 @@ export class ValidationService {
       errors.email = 'Please enter a valid email address';
     }
 
+    // Confirm email validation
+    if (!formData.confirmEmail) {
+      errors.confirmEmail = 'Please confirm your email';
+    } else if (formData.email !== formData.confirmEmail) {
+      errors.confirmEmail = 'Email addresses do not match';
+    }
+
     // Password validation
     if (!formData.password) {
       errors.password = 'Password is required';
@@ -54,6 +63,13 @@ export class ValidationService {
       errors.password = 'Password must be at least 6 characters';
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
     }
 
     // Display name validation

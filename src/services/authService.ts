@@ -15,7 +15,17 @@ export class AuthService {
         throw new Error('Firebase authentication not configured');
       }
 
-      // 1. Create user in Firebase
+      // 1. Validate registration data
+      const validationResult = await ValidationService.validateRegistrationData(signUpData);
+      if (!validationResult.isValid) {
+        return {
+          success: false,
+          error: 'Validation failed',
+          validationErrors: validationResult.errors
+        };
+      }
+
+      // 2. Create user in Firebase
       const firebaseUser = await auth.createUser({
         email: signUpData.email,
         password: signUpData.password,

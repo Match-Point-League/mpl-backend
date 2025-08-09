@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse } from '../types';
-import { auth } from '../config/firebase';
+import { ApiResponse, SignUpRequest, SignUpResponse } from '../types';
+import { AuthService } from '../services/authService';
 
 export class AuthController {
   /**
@@ -8,80 +8,37 @@ export class AuthController {
    * POST /api/v1/auth/signup
    * 
    * This endpoint:
-   * 1. Accepts registration form data (frontend already validated)
-   * 2. Creates a Firebase user
-   * 3. Returns success/error response
-   * 
-   * Note: Does NOT save to PostgreSQL - that's a separate feature
+   * 1. Accepts registration form data
+   * 2. Validates data using ValidationService
+   * 3. Creates user using AuthService
+   * 4. Returns success/error response with field-specific errors
    */
   public static async signUp(req: Request, res: Response): Promise<void> {
     try {
-      const formData: RegistrationFormData = req.body;
+      const formData: SignUpRequest = req.body;
 
-      // Check if Firebase is configured
-      if (!auth) {
-        const response: ApiResponse = {
-          success: false,
-          error: 'Firebase is not configured',
-          timestamp: new Date().toISOString(),
-        };
-        res.status(500).json(response);
-        return;
-      }
+      // Use AuthService to handle registration (includes validation)
+      const result = await AuthService.signUp(formData);
 
-      // Create Firebase user (frontend already validated the data)
-      let firebaseUser;
-      try {
-        firebaseUser = await auth.createUser({
-          email: formData.email,
-          password: formData.password,
-          displayName: formData.displayName,
-        });
-      } catch (firebaseError: any) {
-        let errorMessage = 'Failed to create user account';
-        
-        switch (firebaseError.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = 'The email address is already in use by another account.';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Invalid email address';
-            break;
-          case 'auth/weak-password':
-            errorMessage = 'Password should be at least 6 characters';
-            break;
-          default:
-            errorMessage = firebaseError.message || errorMessage;
-        }
-
-        const response: ApiResponse = {
-          success: false,
-          error: errorMessage,
-          timestamp: new Date().toISOString(),
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      // Success response
-      const response: ApiResponse<RegistrationResponse> = {
-        success: true,
-        message: 'Account created successfully',
-        data: {
+      if (result.success) {
+        const response: ApiResponse<SignUpResponse> = {
           success: true,
-          message: 'Account created successfully',
-          data: {
-            user: {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              displayName: firebaseUser.displayName || '',
-            },
-          },
-        },
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(201).json(response);
+          message: result.message || 'Account created successfully',
+          data: result,
+          timestamp: new Date().toISOString(),
+        };
+        res.status(201).json(response);
+      } else {
+        // Handle validation errors or other errors
+        const statusCode = result.validationErrors ? 400 : 500;
+        const response: ApiResponse<SignUpResponse> = {
+          success: false,
+          error: result.error || 'Registration failed',
+          data: result,
+          timestamp: new Date().toISOString(),
+        };
+        res.status(statusCode).json(response);
+      }
     } catch (error: any) {
       console.error('Signup error:', error);
       

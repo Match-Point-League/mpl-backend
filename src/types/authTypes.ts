@@ -4,7 +4,9 @@
 
 export interface SignUpRequest {
   email: string;
+  confirmEmail: string;
   password: string;
+  confirmPassword: string;
   fullName: string;
   displayName: string;
   sportsInterested: string[];
@@ -18,6 +20,18 @@ export interface SignUpResponse {
   message?: string;
   error?: string;
   userId?: string;
+  validationErrors?: {
+    email?: string;
+    password?: string;
+    fullName?: string;
+    displayName?: string;
+    sportsInterested?: string;
+    skillLevel?: string;
+    zipCode?: string;
+    confirmEmail?: string;
+    confirmPassword?: string;
+    general?: string;
+  };
 }
 
 export interface SignInRequest {
