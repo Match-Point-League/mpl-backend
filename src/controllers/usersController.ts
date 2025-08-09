@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ApiResponse } from '../types';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { ErrorHandler } from '../utils/errorHandler';
 
 export class UsersController {
 
@@ -45,13 +46,7 @@ export class UsersController {
       };
       res.json(response);
     } catch (error) {
-      // If there is an error, return a 500 error
-      const response: ApiResponse = {
-        success: false,
-        error: 'Failed to get user by email',
-        timestamp: new Date().toISOString(),
-      };
-      res.status(500).json(response);
+      ErrorHandler.handleControllerError(res, error, 'Failed to get user by email');
     }
   }
 }

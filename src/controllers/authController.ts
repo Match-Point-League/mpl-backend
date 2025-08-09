@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ApiResponse, RegistrationFormData, RegistrationResponse, SignInRequest, SignInResponse } from '../types';
 import { AuthService } from '../services/authService';
+import { ErrorHandler } from '../utils/errorHandler';
 
 export class AuthController {
   /**
@@ -40,15 +41,7 @@ export class AuthController {
         res.status(statusCode).json(response);
       }
     } catch (error: any) {
-      console.error('Signup error:', error);
-      
-      const response: ApiResponse = {
-        success: false,
-        error: 'Failed to sign up user',
-        timestamp: new Date().toISOString(),
-      };
-      
-      res.status(500).json(response);
+      ErrorHandler.handleControllerError(res, error, 'Failed to sign up user');
     }
   }
 
@@ -87,15 +80,7 @@ export class AuthController {
         res.status(401).json(response);
       }
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      
-      const response: ApiResponse = {
-        success: false,
-        error: 'Failed to sign in user',
-        timestamp: new Date().toISOString(),
-      };
-      
-      res.status(500).json(response);
+      ErrorHandler.handleControllerError(res, error, 'Failed to sign in user');
     }
   }
 } 

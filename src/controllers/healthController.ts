@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ApiResponse, HealthCheckResponse } from '../types';
 import database from '../config/database';
 import { serverConfig } from '../config';
+import { ErrorHandler } from '../utils/errorHandler';
 
 export class HealthController {
   /**
@@ -36,15 +37,7 @@ export class HealthController {
       res.status(statusCode).json(response);
       
     } catch (error) {
-      console.error('Health check failed:', error);
-      
-      const errorResponse: ApiResponse = {
-        success: false,
-        error: 'Health check failed',
-        timestamp: new Date().toISOString(),
-      };
-      
-      res.status(503).json(errorResponse);
+      ErrorHandler.handleControllerError(res, error, 'Health check failed', 503);
     }
   }
 
