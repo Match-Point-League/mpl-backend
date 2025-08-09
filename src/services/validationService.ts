@@ -1,5 +1,4 @@
-import { SignUpRequest, PreferredSport} from '../types';
-import { ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult } from '../types/validationTypes';
+import { SignUpRequest, PreferredSport,  ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult } from '../types';
 
 /**
  * Service for validating registration form data
