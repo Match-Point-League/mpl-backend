@@ -69,8 +69,35 @@ export class AuthService {
         throw new Error('Firebase authentication not configured');
       }
 
-      // 1. Verify user exists in Firebase
-      const firebaseUser = await auth.getUserByEmail(signInData.email);
+      // 1. Verify email and password with Firebase Auth REST API
+      const firebaseApiKey = process.env.FIREBASE_API_KEY;
+      if (!firebaseApiKey) {
+        throw new Error('Firebase API key not configured');
+      }
+
+      const authResponse = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: signInData.email,
+            password: signInData.password,
+            returnSecureToken: true
+          })
+        }
+      );
+
+      const authData = await authResponse.json() as any;
+
+      if (!authResponse.ok) {
+        // Handle Firebase Auth errors
+        const errorMessage = this.handleFirebaseAuthError(authData.error);
+        return {
+          success: false,
+          error: errorMessage,
+        };
+      }
 
       // 2. Get user profile from PostgreSQL
       const result = await this.db.query(
@@ -87,8 +114,8 @@ export class AuthService {
 
       const userProfile = result.rows[0];
 
-      // 3. Create custom token for the user
-      const customToken = await auth.createCustomToken(firebaseUser.uid);
+      // 3. Create custom token for the user (using the verified UID)
+      const customToken = await auth.createCustomToken(authData.localId as string);
 
       return {
         success: true,
@@ -160,6 +187,30 @@ export class AuthService {
         return 'User not found';
       case 'auth/wrong-password':
         return 'Incorrect password';
+      default:
+        return error.message || 'Authentication failed';
+    }
+  }
+
+  /**
+   * Handle Firebase Auth REST API errors
+   */
+  private static handleFirebaseAuthError(error: any): string {
+    if (!error || !error.message) {
+      return 'Authentication failed';
+    }
+
+    switch (error.message) {
+      case 'EMAIL_NOT_FOUND':
+        return 'No account found with this email address';
+      case 'INVALID_PASSWORD':
+        return 'Incorrect password';
+      case 'USER_DISABLED':
+        return 'This account has been disabled';
+      case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+        return 'Too many failed attempts. Please try again later';
+      case 'INVALID_EMAIL':
+        return 'Invalid email address';
       default:
         return error.message || 'Authentication failed';
     }
