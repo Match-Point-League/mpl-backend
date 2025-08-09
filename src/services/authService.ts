@@ -61,7 +61,7 @@ export class AuthService {
       return {
         success: true,
         message: 'User created successfully',
-        userId: result.rows[0].id,
+        userId: firebaseUser.uid,  // Return Firebase UID instead of PostgreSQL ID
       };
     } catch (error) {
       console.error('Sign up error:', error);
@@ -111,7 +111,7 @@ export class AuthService {
         };
       }
 
-      // 2. Get user profile from PostgreSQL
+      // 2. Get user profile from PostgreSQL using email
       const result = await this.db.query(
         'SELECT id, email, name, display_name FROM users WHERE email = $1',
         [signInData.email]
@@ -134,7 +134,7 @@ export class AuthService {
         message: 'Sign in successful',
         token: customToken,
         user: {
-          id: userProfile.id,
+          id: authData.localId,  // Return Firebase UID from auth response
           email: userProfile.email,
           name: userProfile.name,
           displayName: userProfile.display_name,
