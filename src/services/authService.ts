@@ -35,21 +35,15 @@ export class AuthService {
       };
 
       // 3. Store user profile in PostgreSQL
+      const fields = Object.keys(userData);
+      const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
+      const values = Object.values(userData);
+      
       const result = await this.db.query(
-        `INSERT INTO users (email, name, display_name, skill_level, preferred_sport, is_competitive, city, zip_code, allow_direct_contact)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `INSERT INTO users (${fields.join(', ')})
+         VALUES (${placeholders})
          RETURNING id`,
-        [
-          userData.email,
-          userData.name,
-          userData.display_name,
-          userData.skill_level,
-          userData.preferred_sport,
-          userData.is_competitive,
-          userData.city,
-          userData.zip_code,
-          userData.allow_direct_contact,
-        ]
+        values
       );
 
       return {
