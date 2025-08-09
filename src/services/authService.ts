@@ -50,18 +50,35 @@ export class AuthService {
       const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
       const values = Object.values(userData);
       
-      const result = await this.db.query(
-        `INSERT INTO users (${fields.join(', ')})
-         VALUES (${placeholders})
-         RETURNING id`,
-        values
-      );
+      try {
+        const result = await this.db.query(
+          `INSERT INTO users (${fields.join(', ')})
+           VALUES (${placeholders})
+           RETURNING id`,
+          values
+        );
 
-      return {
-        success: true,
-        message: 'User created successfully',
-        userId: firebaseUser.uid,  // Return Firebase UID instead of PostgreSQL ID
-      };
+        return {
+          success: true,
+          message: 'User created successfully',
+          userId: firebaseUser.uid,  // Return Firebase UID instead of PostgreSQL ID
+        };
+      } catch (dbError: any) {
+        // Handle database-specific errors
+        const dbErrorMessage = this.handleDatabaseError(dbError);
+        
+        // Log the database error for debugging
+        console.error('Database error during user creation:', {
+          error: dbError,
+          email: signUpData.email,
+          firebaseUid: firebaseUser.uid
+        });
+
+        return {
+          success: false,
+          error: dbErrorMessage,
+        };
+      }
     } catch (error) {
       console.error('Sign up error:', error);
       return {
@@ -211,6 +228,51 @@ export class AuthService {
         return 'Invalid email address';
       default:
         return error.message || 'Authentication failed';
+    }
+  }
+
+  /**
+   * Handle database-specific errors and return user-friendly messages
+   */
+  private static handleDatabaseError(error: any): string {
+    // PostgreSQL error codes
+    const errorCode = error.code;
+    
+    switch (errorCode) {
+      case '23505': // Unique violation
+        if (error.constraint && error.constraint.includes('email')) {
+          return 'An account with this email already exists';
+        }
+        return 'A record with this information already exists';
+        
+      case '23502': // Not null violation
+        return 'Required information is missing. Please check your registration data.';
+        
+      case '23514': // Check violation
+        if (error.constraint && error.constraint.includes('skill_level')) {
+          return 'Skill level must be between 1.0 and 5.5';
+        }
+        if (error.constraint && error.constraint.includes('preferred_sport')) {
+          return 'Preferred sport must be tennis, pickleball, or both';
+        }
+        return 'Invalid data provided. Please check your registration information.';
+        
+      case '08000': // Connection exception
+        return 'Database connection error. Please try again later.';
+        
+      case '08003': // Connection does not exist
+        return 'Database connection lost. Please try again later.';
+        
+      case '57014': // Query canceled
+        return 'Database operation was canceled. Please try again.';
+        
+      case '40P01': // Deadlock detected
+        return 'Database is temporarily busy. Please try again in a moment.';
+        
+      default:
+        // Log unknown error codes for debugging
+        console.error('Unknown database error code:', errorCode, error);
+        return 'Database error occurred. Please try again later.';
     }
   }
 } 
