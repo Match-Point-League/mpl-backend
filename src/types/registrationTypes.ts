@@ -22,6 +22,7 @@ export interface RegistrationResponse {
   success: boolean;
   message?: string;
   error?: string;
+  userId?: string;  // Added to match backend response
   validationErrors?: ValidationErrors;
 }
 

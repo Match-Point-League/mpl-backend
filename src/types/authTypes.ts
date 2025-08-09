@@ -2,36 +2,7 @@
  * Authentication-related types for the backend
  */
 
-export interface SignUpRequest {
-  email: string;
-  confirmEmail: string;
-  password: string;
-  confirmPassword: string;
-  fullName: string;
-  displayName: string;
-  preferredSports: string[];
-  skillLevel: number;
-  zipCode: string;
-}
-
-export interface SignUpResponse {
-  success: boolean;
-  message?: string;
-  error?: string;
-  userId?: string;
-  validationErrors?: {
-    email?: string;
-    password?: string;
-    fullName?: string;
-    displayName?: string;
-    preferredSports?: string;
-    skillLevel?: string;
-    zipCode?: string;
-    confirmEmail?: string;
-    confirmPassword?: string;
-    general?: string;
-  };
-}
+// SignUpRequest and SignUpResponse moved to registrationTypes.ts
 
 export interface SignInRequest {
   email: string;

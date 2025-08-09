@@ -1,5 +1,6 @@
 import { auth } from '../config/firebase';
-import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput } from '../types';
+import { SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput } from '../types';
+import { RegistrationFormData, RegistrationResponse } from '../types/registrationTypes';
 import database from '../config/database';
 import { ValidationService } from './validationService';
 
@@ -9,7 +10,7 @@ export class AuthService {
   /**
    * Create a new user in Firebase and store profile data in PostgreSQL
    */
-  static async signUp(signUpData: SignUpRequest): Promise<SignUpResponse> {
+  static async signUp(signUpData: RegistrationFormData): Promise<RegistrationResponse> {
     try {
       if (!auth) {
         throw new Error('Firebase authentication not configured');

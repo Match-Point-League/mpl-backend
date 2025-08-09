@@ -1,4 +1,5 @@
-import { SignUpRequest, PreferredSport,  ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult } from '../types';
+import { PreferredSport, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult } from '../types';
+import { RegistrationFormData } from '../types/registrationTypes';
 
 /**
  * Service for validating registration form data
@@ -51,7 +52,7 @@ export class ValidationService {
   /**
    * Validates complete registration form data
    */
-  public static async validateRegistrationData(formData: SignUpRequest): Promise<ValidationResult> {
+  public static async validateRegistrationData(formData: RegistrationFormData): Promise<ValidationResult> {
     const errors: ValidationErrors = {};
 
     // Full name validation
