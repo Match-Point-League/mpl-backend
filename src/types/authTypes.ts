@@ -29,7 +29,4 @@ export interface FirebaseUser {
   emailVerified: boolean;
 }
 
-export interface AuthError {
-  code: string;
-  message: string;
-} 
+// AuthError interface removed - using unified handleFirebaseError method instead 
