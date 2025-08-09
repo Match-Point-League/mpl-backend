@@ -10,6 +10,8 @@ export class AuthService {
    * Create a new user in Firebase and store profile data in PostgreSQL
    */
   static async signUp(signUpData: RegistrationFormData): Promise<RegistrationResponse> {
+    let firebaseUser: any = null;
+    
     try {
       if (!auth) {
         throw new Error('Firebase authentication not configured');
@@ -26,13 +28,13 @@ export class AuthService {
       }
 
       // 2. Create user in Firebase
-      const firebaseUser = await auth.createUser({
+      firebaseUser = await auth.createUser({
         email: signUpData.email,
         password: signUpData.password,
         displayName: signUpData.displayName,
       });
 
-      // 2. Prepare user data for PostgreSQL
+      // 3. Prepare user data for PostgreSQL
       const userData: CreateUserInput = {
         email: signUpData.email,
         name: signUpData.fullName,
@@ -45,7 +47,7 @@ export class AuthService {
         allow_direct_contact: false, // Default value
       };
 
-      // 3. Store user profile in PostgreSQL
+      // 4. Store user profile in PostgreSQL
       const fields = Object.keys(userData);
       const placeholders = fields.map((_, index) => `$${index + 1}`).join(', ');
       const values = Object.values(userData);
@@ -74,17 +76,49 @@ export class AuthService {
           firebaseUid: firebaseUser.uid
         });
 
+        // Rollback: Delete Firebase user since database insert failed
+        await this.rollbackFirebaseUser(firebaseUser.uid, signUpData.email);
+
         return {
           success: false,
           error: dbErrorMessage,
         };
       }
     } catch (error) {
+      // If Firebase user creation failed, no rollback needed
+      if (firebaseUser) {
+        // If we got here and have a Firebase user, something else failed
+        // Rollback the Firebase user to be safe
+        await this.rollbackFirebaseUser(firebaseUser.uid, signUpData.email);
+      }
+      
       console.error('Sign up error:', error);
       return {
         success: false,
         error: this.handleAuthError(error as AuthError),
       };
+    }
+  }
+
+  /**
+   * Rollback Firebase user creation by deleting the user
+   */
+  private static async rollbackFirebaseUser(firebaseUid: string, email: string): Promise<void> {
+    try {
+      if (!auth) {
+        console.error('Cannot rollback Firebase user: auth not configured');
+        return;
+      }
+
+      await auth.deleteUser(firebaseUid);
+      console.log(`Firebase user rollback successful for UID: ${firebaseUid}, email: ${email}`);
+    } catch (rollbackError: any) {
+      console.error('Firebase rollback failed:', {
+        firebaseUid,
+        email,
+        error: rollbackError
+      });
+      // Don't throw here - we don't want rollback failure to affect the main error response
     }
   }
 
