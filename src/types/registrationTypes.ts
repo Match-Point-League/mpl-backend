@@ -30,36 +30,22 @@ export interface RegistrationErrors {
 }
 
 /**
- * ZIP code lookup response
- */
-export interface ZipCodeResponse {
-  city: string;
-  state: string;
-  fullLocation: string;
-}
-
-/**
- * Registration validation result
- */
-export interface RegistrationValidationResult {
-  isValid: boolean;
-  errors: RegistrationErrors;
-  cityInfo?: ZipCodeResponse;
-}
-
-/**
  * Registration API response
  */
 export interface RegistrationResponse {
   success: boolean;
   message?: string;
   error?: string;
-  data?: {
-    user: {
-      uid: string;
-      email: string;
-      displayName: string;
-      cityInfo?: ZipCodeResponse;
-    };
+  validationErrors?: {
+    email?: string;
+    password?: string;
+    fullName?: string;
+    displayName?: string;
+    sportsInterested?: string;
+    skillLevel?: string;
+    zipCode?: string;
+    confirmEmail?: string;
+    confirmPassword?: string;
+    general?: string;
   };
 } 
