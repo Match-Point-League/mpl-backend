@@ -1,6 +1,7 @@
 import { auth } from '../config/firebase';
-import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput, PreferredSport } from '../types';
+import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput } from '../types';
 import database from '../config/database';
+import { ValidationService } from './validationService';
 
 export class AuthService {
   private static db = database.getPool();
@@ -27,7 +28,7 @@ export class AuthService {
         name: signUpData.fullName,
         display_name: signUpData.displayName,
         skill_level: signUpData.skillLevel,
-        preferred_sport: this.mapSportsToPreferredSport(signUpData.sportsInterested),
+        preferred_sport: ValidationService.mapSportsToPreferredSport(signUpData.sportsInterested),
         is_competitive: false, // Default value
         city: signUpData.cityName || '',
         zip_code: signUpData.zipCode,
@@ -156,19 +157,6 @@ export class AuthService {
     } catch (error) {
       console.error('Token verification error:', error);
       return null;
-    }
-  }
-
-  /**
-   * Map sports array to preferred sport enum
-   */
-  private static mapSportsToPreferredSport(sports: string[]): PreferredSport {
-    if (sports.includes('tennis') && sports.includes('pickleball')) {
-      return PreferredSport.BOTH;
-    } else if (sports.includes('pickleball')) {
-      return PreferredSport.PICKLEBALL;
-    } else {
-      return PreferredSport.TENNIS;
     }
   }
 

@@ -1,4 +1,4 @@
-import { SignUpRequest } from '../types/authTypes';
+import { SignUpRequest, PreferredSport} from '../types';
 import { ZipCodeService } from './zipCodeService';
 
 export interface ValidationErrors {
@@ -97,5 +97,18 @@ export class ValidationService {
       errors: {},
       cityInfo: cityInfo || undefined
     };
+  }
+
+  /**
+   * Map sports array to preferred sport enum
+   */
+  public static mapSportsToPreferredSport(sports: string[]): PreferredSport {
+    if (sports.includes('tennis') && sports.includes('pickleball')) {
+      return PreferredSport.BOTH;
+    } else if (sports.includes('pickleball')) {
+      return PreferredSport.PICKLEBALL;
+    } else {
+      return PreferredSport.TENNIS;
+    }
   }
 } 
