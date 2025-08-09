@@ -1,6 +1,5 @@
 import { auth } from '../config/firebase';
-import { SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput } from '../types';
-import { RegistrationFormData, RegistrationResponse } from '../types/registrationTypes';
+import { SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput, RegistrationFormData, RegistrationResponse } from '../types';
 import database from '../config/database';
 import { ValidationService } from './validationService';
 

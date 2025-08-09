@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse } from '../types';
-import { RegistrationFormData, RegistrationResponse } from '../types/registrationTypes';
+import { ApiResponse, RegistrationFormData, RegistrationResponse } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
