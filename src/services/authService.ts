@@ -1,6 +1,5 @@
 import { auth } from '../config/firebase';
-import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError } from '../types/authTypes';
-import { CreateUserInput, PreferredSport } from '../types/userTypes';
+import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput, PreferredSport } from '../types';
 import database from '../config/database';
 
 export class AuthService {
