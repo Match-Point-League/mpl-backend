@@ -33,7 +33,7 @@ export class AuthController {
         const statusCode = result.validationErrors ? 400 : 500;
         const response: ApiResponse<RegistrationResponse> = {
           success: false,
-          error: result.error || 'Registration failed',
+          error: result.error || 'Failed to sign up user',
           data: result,
           timestamp: new Date().toISOString(),
         };
@@ -80,7 +80,7 @@ export class AuthController {
       } else {
         const response: ApiResponse<SignInResponse> = {
           success: false,
-          error: result.error || 'Sign in failed',
+          error: result.error || 'Failed to sign in user',
           data: result,
           timestamp: new Date().toISOString(),
         };
