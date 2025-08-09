@@ -44,7 +44,7 @@ export class AuthController {
       
       const response: ApiResponse = {
         success: false,
-        error: 'Internal server error',
+        error: 'Failed to sign up user',
         timestamp: new Date().toISOString(),
       };
       
