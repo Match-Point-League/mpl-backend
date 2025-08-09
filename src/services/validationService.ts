@@ -1,4 +1,4 @@
-import { SignUpRequest } from '../types/auth';
+import { SignUpRequest } from '../types/authTypes';
 import { ZipCodeService } from './zipCodeService';
 
 export interface ValidationErrors {

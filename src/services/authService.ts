@@ -1,5 +1,5 @@
 import { auth } from '../config/firebase';
-import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError } from '../types/auth';
+import { SignUpRequest, SignUpResponse, SignInRequest, SignInResponse, FirebaseUser, AuthError } from '../types/authTypes';
 import { CreateUserInput, PreferredSport } from '../types/userTypes';
 import database from '../config/database';
 
