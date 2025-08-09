@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { ApiResponse, HealthCheckResponse } from '../types';
 import database from '../config/database';
 import { serverConfig } from '../config';
-import { ErrorHandler } from '../utils/errorHandler';
 
 export class HealthController {
   /**
