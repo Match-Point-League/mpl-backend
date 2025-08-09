@@ -184,7 +184,7 @@ export class AuthService {
    */
   private static handleFirebaseError(error: any): string {
     // Handle Admin SDK errors
-    if (error.code && error.code.startsWith('auth/')) {
+    if (error.code && typeof error.code === 'string' && error.code.startsWith('auth/')) {
       switch (error.code) {
         case 'auth/email-already-exists':
           return 'An account with this email already exists';
