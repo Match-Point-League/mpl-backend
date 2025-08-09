@@ -53,13 +53,8 @@ export class AuthService {
       const values = Object.values(userData);
       
       try {
-        const result = await this.db.query(
-          `INSERT INTO users (${fields.join(', ')})
-           VALUES (${placeholders})
-           RETURNING id`,
-          values
-        );
-
+        const result = await this.retryDatabaseInsert(fields, placeholders, values);
+        
         return {
           success: true,
           message: 'User created successfully',
@@ -120,6 +115,74 @@ export class AuthService {
       });
       // Don't throw here - we don't want rollback failure to affect the main error response
     }
+  }
+
+  /**
+   * Retry database insert with exponential backoff for transient errors
+   */
+  private static async retryDatabaseInsert(fields: string[], placeholders: string, values: any[]): Promise<any> {
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 second
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await this.db.query(
+          `INSERT INTO users (${fields.join(', ')})
+           VALUES (${placeholders})
+           RETURNING id`,
+          values
+        );
+        
+        // Success! Return the result
+        return result;
+      } catch (error: any) {
+        const isTransientError = this.isTransientError(error);
+        
+        if (attempt === maxRetries || !isTransientError) {
+          // Last attempt or non-transient error - re-throw to be handled by caller
+          throw error;
+        }
+        
+        // Transient error and not the last attempt - wait and retry
+        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff: 1s, 2s, 4s
+        console.log(`Database insert attempt ${attempt} failed with transient error. Retrying in ${delay}ms...`, {
+          error: error.message,
+          attempt,
+          maxRetries
+        });
+        
+        await this.sleep(delay);
+      }
+    }
+  }
+
+  /**
+   * Check if a database error is transient (can be retried)
+   */
+  private static isTransientError(error: any): boolean {
+    const errorCode = error.code;
+    
+    // Transient error codes that can be retried
+    const transientErrorCodes = [
+      '08000', // Connection exception
+      '08003', // Connection does not exist
+      '57014', // Query canceled
+      '40P01', // Deadlock detected
+      '55P03', // Lock not available
+      '53300', // Insufficient resources
+      '57P01', // Admin shutdown
+      '57P02', // Crash shutdown
+      '57P03', // Cannot connect now
+    ];
+    
+    return transientErrorCodes.includes(errorCode);
+  }
+
+  /**
+   * Sleep utility for implementing delays
+   */
+  private static sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
