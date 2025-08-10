@@ -132,7 +132,7 @@ export class ValidationService {
     }
 
     // If ZIP code is valid, try to get city information
-    let cityInfo = null;
+    let cityInfo: CityInfo | null = null;
     if (formData.zipCode && this.validateZipCodeFormat(formData.zipCode)) {
       cityInfo = await this.getCityFromZipCode(formData.zipCode);
     }
