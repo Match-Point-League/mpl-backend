@@ -87,7 +87,7 @@ export class AuthService {
       } catch (error) {
         return {
           success: false,
-          error: 'User not found',
+          error: 'No account found with this email address',
         };
       }
 
@@ -112,12 +112,40 @@ export class AuthService {
 
       if (!authResponse.ok) {
         const authData = await authResponse.json() as any;
-        const errorMessage = this.handleFirebaseError(authData.error);
-        return {
-          success: false,
-          error: errorMessage,
-        };
+        console.log('❌ Firebase Auth REST API error:', authData);
+        
+        // Provide specific error messages based on Firebase error codes
+        if (authData.error?.message === 'INVALID_PASSWORD') {
+          return {
+            success: false,
+            error: 'Incorrect password. Please try again.',
+          };
+        } else if (authData.error?.message === 'USER_NOT_FOUND') {
+          return {
+            success: false,
+            error: 'No account found with this email address',
+          };
+        } else if (authData.error?.message === 'INVALID_EMAIL') {
+          return {
+            success: false,
+            error: 'Please enter a valid email address',
+          };
+        } else if (authData.error?.message === 'TOO_MANY_ATTEMPTS_TRY_LATER') {
+          return {
+            success: false,
+            error: 'Too many failed attempts. Please try again later.',
+          };
+        } else {
+          // Fallback to generic error message
+          const errorMessage = this.handleFirebaseError(authData.error);
+          return {
+            success: false,
+            error: errorMessage,
+          };
+        }
       }
+      
+      console.log('✅ Password verified successfully');
 
       // 2. Get user profile from PostgreSQL using email
       const result = await this.db.query(
