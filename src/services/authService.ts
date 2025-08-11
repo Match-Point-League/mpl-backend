@@ -43,6 +43,7 @@ export class AuthService {
         city: validationResult.cityInfo?.fullLocation || '',
         zip_code: signUpData.zipCode,
         allow_direct_contact: false, // Default value
+        role: ValidationService.getDefaultRole(), // Default role for new users
       };
 
       // 4. Store user profile in PostgreSQL with retry
@@ -225,7 +226,7 @@ export class AuthService {
   private static async verifyDataCompleteness(firebaseUid: string, userData: CreateUserInput): Promise<{isComplete: boolean, missingFields: string[]}> {
     try {
       const result = await this.db.query(
-        'SELECT email, name, display_name, skill_level, preferred_sport, city, zip_code FROM users WHERE email = $1',
+        'SELECT email, name, display_name, skill_level, preferred_sport, city, zip_code, role FROM users WHERE email = $1',
         [userData.email]
       );
 
@@ -244,6 +245,7 @@ export class AuthService {
       if (!storedData.preferred_sport || storedData.preferred_sport !== userData.preferred_sport) missingFields.push('preferred_sport');
       if (!storedData.city || storedData.city !== userData.city) missingFields.push('city');
       if (!storedData.zip_code || storedData.zip_code !== userData.zip_code) missingFields.push('zip_code');
+      if (!storedData.role || storedData.role !== userData.role) missingFields.push('role');
 
       return {
         isComplete: missingFields.length === 0,
@@ -296,7 +298,7 @@ export class AuthService {
 
       // 2. Get user profile from PostgreSQL using email
       const result = await this.db.query(
-        'SELECT id, email, name, display_name FROM users WHERE email = $1',
+        'SELECT id, email, name, display_name, role FROM users WHERE email = $1',
         [signInData.email]
       );
 
@@ -321,6 +323,7 @@ export class AuthService {
           email: userProfile.email,
           name: userProfile.name,
           displayName: userProfile.display_name,
+          role: userProfile.role, // Include role for access control
         },
       };
     } catch (error) {

@@ -1,4 +1,4 @@
-import { PreferredSport, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
+import { SportOptions, UserRole, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
 
 /**
  * Service for validating registration form data
@@ -102,8 +102,8 @@ export class ValidationService {
       errors.preferredSports = 'Please select at least one sport';
     } else {
       // Validate that only valid sports are selected
-      const validSports = ['tennis', 'pickleball'];
-      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase()));
+      const validSports = [SportOptions.TENNIS, SportOptions.PICKLEBALL];
+      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase() as SportOptions));
       if (invalidSports.length > 0) {
         errors.preferredSports = `Invalid sports selected: ${invalidSports.join(', ')}. Only tennis and pickleball are allowed.`;
       }
@@ -147,13 +147,20 @@ export class ValidationService {
   /**
    * Map sports array to preferred sport enum
    */
-  public static mapSportsToPreferredSport(sports: string[]): PreferredSport {
+  public static mapSportsToPreferredSport(sports: string[]): SportOptions {
     if (sports.includes('tennis') && sports.includes('pickleball')) {
-      return PreferredSport.BOTH;
+      return SportOptions.BOTH;
     } else if (sports.includes('pickleball')) {
-      return PreferredSport.PICKLEBALL;
+      return SportOptions.PICKLEBALL;
     } else {
-      return PreferredSport.TENNIS;
+      return SportOptions.TENNIS;
     }
+  }
+
+  /**
+   * Get default role for new users
+   */
+  public static getDefaultRole(): UserRole {
+    return UserRole.PLAYER;
   }
 } 

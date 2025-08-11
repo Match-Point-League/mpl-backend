@@ -32,6 +32,7 @@ export interface ValidationErrors {
   preferredSports?: string;
   skillLevel?: string;
   zipCode?: string;
+  role?: string;
   general?: string;
   confirmEmail?: string;
   confirmPassword?: string;
