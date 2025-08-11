@@ -115,33 +115,34 @@ export class AuthService {
         console.log('❌ Firebase Auth REST API error:', authData);
         
         // Provide specific error messages based on Firebase error codes
-        if (authData.error?.message === 'INVALID_PASSWORD') {
-          return {
-            success: false,
-            error: 'Incorrect password. Please try again.',
-          };
-        } else if (authData.error?.message === 'USER_NOT_FOUND') {
-          return {
-            success: false,
-            error: 'No account found with this email address',
-          };
-        } else if (authData.error?.message === 'INVALID_EMAIL') {
-          return {
-            success: false,
-            error: 'Please enter a valid email address',
-          };
-        } else if (authData.error?.message === 'TOO_MANY_ATTEMPTS_TRY_LATER') {
-          return {
-            success: false,
-            error: 'Too many failed attempts. Please try again later.',
-          };
-        } else {
-          // Fallback to generic error message
-          const errorMessage = this.handleFirebaseError(authData.error);
-          return {
-            success: false,
-            error: errorMessage,
-          };
+        switch (authData.error?.message) {
+          case 'INVALID_PASSWORD':
+            return {
+              success: false,
+              error: 'Incorrect password. Please try again.',
+            };
+          case 'USER_NOT_FOUND':
+            return {
+              success: false,
+              error: 'No account found with this email address',
+            };
+          case 'INVALID_EMAIL':
+            return {
+              success: false,
+              error: 'Please enter a valid email address',
+            };
+          case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+            return {
+              success: false,
+              error: 'Too many failed attempts. Please try again later.',
+            };
+          default:
+            // Fallback to generic error message
+            const errorMessage = this.handleFirebaseError(authData.error);
+            return {
+              success: false,
+              error: errorMessage,
+            };
         }
       }
       
