@@ -60,3 +60,6 @@ export * from './databaseTypes';
 export * from './userTypes';
 export * from './courtTypes';
 export * from './matchTypes';
+export * from './authTypes';
+export * from './registrationTypes';
+export * from './validationTypes';
