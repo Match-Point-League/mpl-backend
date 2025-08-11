@@ -57,6 +57,12 @@ export const up = (pgm) => {
       notNull: true,
       default: false,
     },
+    role: {
+      type: 'varchar(20)',
+      notNull: true,
+      default: 'player',
+      check: "role IN ('player', 'admin', 'superadmin')",
+    },
     created_at: {
       type: 'timestamp with time zone',
       notNull: true,
@@ -71,6 +77,7 @@ export const up = (pgm) => {
 
   pgm.createIndex('users', 'email');
   pgm.createIndex('users', 'preferred_sport');
+  pgm.createIndex('users', 'role');
   // Create updated_at trigger function
   pgm.createFunction(
     'trigger_set_timestamp',
