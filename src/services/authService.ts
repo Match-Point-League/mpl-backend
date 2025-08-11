@@ -248,6 +248,8 @@ export class AuthService {
           return 'Too many failed attempts. Please try again later';
         case 'INVALID_EMAIL':
           return 'Invalid email address';
+        case 'INVALID_LOGIN_CREDENTIALS':
+          return 'Invalid email or password';  
         default:
           return error.message || 'Authentication failed';
       }
