@@ -1,4 +1,4 @@
-import { PreferredSport, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
+import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
 
 /**
  * Service for validating registration form data
@@ -147,13 +147,13 @@ export class ValidationService {
   /**
    * Map sports array to preferred sport enum
    */
-  public static mapSportsToPreferredSport(sports: string[]): PreferredSport {
+  public static mapSportsToPreferredSport(sports: string[]): SportOptions {
     if (sports.includes('tennis') && sports.includes('pickleball')) {
-      return PreferredSport.BOTH;
+      return SportOptions.BOTH;
     } else if (sports.includes('pickleball')) {
-      return PreferredSport.PICKLEBALL;
+      return SportOptions.PICKLEBALL;
     } else {
-      return PreferredSport.TENNIS;
+      return SportOptions.TENNIS;
     }
   }
 } 
