@@ -100,11 +100,20 @@ export class ValidationService {
     // Sports interested validation
     if (!formData.preferredSports || formData.preferredSports.length === 0) {
       errors.preferredSports = 'Please select at least one sport';
+    } else {
+      // Validate that only valid sports are selected
+      const validSports = ['tennis', 'pickleball'];
+      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase()));
+      if (invalidSports.length > 0) {
+        errors.preferredSports = `Invalid sports selected: ${invalidSports.join(', ')}. Only tennis and pickleball are allowed.`;
+      }
     }
 
     // Skill level validation
     if (formData.skillLevel < 1.0 || formData.skillLevel > 5.5) {
       errors.skillLevel = 'Skill level must be between 1.0 and 5.5';
+    } else if (formData.skillLevel % 0.5 !== 0) {
+      errors.skillLevel = 'Skill level must be in increments of 0.5 (e.g., 1.0, 1.5, 2.0, etc.)';
     }
 
     // ZIP code validation
@@ -123,7 +132,7 @@ export class ValidationService {
     }
 
     // If ZIP code is valid, try to get city information
-    let cityInfo = null;
+    let cityInfo: CityInfo | null = null;
     if (formData.zipCode && this.validateZipCodeFormat(formData.zipCode)) {
       cityInfo = await this.getCityFromZipCode(formData.zipCode);
     }
