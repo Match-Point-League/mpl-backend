@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse, SignInRequest, AuthUser } from '../types';
+import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
@@ -21,20 +21,24 @@ export class AuthController {
       const result = await AuthService.signUp(formData);
 
       if (result.success) {
-        const response: ApiResponse<RegistrationResponse> = {
+        const response: ApiResponse<SignUpResponseData> = {
           success: true,
           message: result.message || 'Account created successfully',
-          data: result,
+          data: {
+            userId: result.userId!,
+          },
           timestamp: new Date().toISOString(),
         };
         res.status(201).json(response);
       } else {
         // Handle validation errors or other errors
         const statusCode = result.validationErrors ? 400 : 500;
-        const response: ApiResponse<RegistrationResponse> = {
+        const response: ApiResponse<SignUpResponseData> = {
           success: false,
           error: result.error || 'Failed to sign up user',
-          data: result,
+          data: {
+            validationErrors: result.validationErrors,
+          },
           timestamp: new Date().toISOString(),
         };
         res.status(statusCode).json(response);
