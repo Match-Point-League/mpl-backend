@@ -175,6 +175,7 @@ export class AuthService {
           email: userProfile.email,
           name: userProfile.name,
           displayName: userProfile.display_name,
+          token: customToken,
         },
       };
     } catch (error) {
