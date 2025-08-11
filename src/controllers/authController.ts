@@ -73,7 +73,13 @@ export class AuthController {
         const response: ApiResponse<AuthUser> = {
           success: true,
           message: result.message || 'Sign in successful',
-          data: result.user,
+          data: {
+            id: result.user?.id || '',
+            email: result.user?.email || '',
+            name: result.user?.name || '',
+            displayName: result.user?.displayName || '',
+            token: result.token || ''
+          },
           timestamp: new Date().toISOString(),
         };
         res.status(200).json(response);
@@ -81,7 +87,13 @@ export class AuthController {
         const response: ApiResponse<AuthUser> = {
           success: false,
           error: result.error || 'Failed to sign in user',
-          data: result.user,
+          data: {
+            id: result.user?.id || '',
+            email: result.user?.email || '',
+            name: result.user?.name || '',
+            displayName: result.user?.displayName || '',
+            token: result.token || ''
+          },
           timestamp: new Date().toISOString(),
         };
         res.status(401).json(response);
