@@ -2,10 +2,19 @@
  * Enum representing the sports that users can prefer in the Match Point League application.
  * This enum defines the available sport options for user profiles.
  */
-export enum PreferredSport {
+export enum SportOptions {
   TENNIS = 'tennis',
   PICKLEBALL = 'pickleball',
   BOTH = 'both',
+}
+
+/**
+ * This enum defines the available role options for user accounts.
+ */
+export enum UserRole {
+  PLAYER = 'player',
+  ADMIN = 'admin',
+  SUPERADMIN = 'superadmin'
 }
 
 /**
@@ -18,11 +27,12 @@ export type User = {
   name: string;
   display_name: string;
   skill_level: number;  // 1.0 - 5.5
-  preferred_sport: PreferredSport;
+  preferred_sport: SportOptions;
   is_competitive: boolean;
   city: string;
   zip_code: string;
   allow_direct_contact: boolean;
+  role: UserRole;
   created_at: Date;
   updated_at: Date;
 }
@@ -36,11 +46,12 @@ export type CreateUserInput = {
   name: string;
   display_name: string;
   skill_level: number;
-  preferred_sport: PreferredSport;
+  preferred_sport: SportOptions;
   is_competitive: boolean;
   city: string;
   zip_code: string;
   allow_direct_contact?: boolean;
+  role: UserRole;
 }
 
 /**
@@ -51,9 +62,10 @@ export type UpdateUserInput = {
   name?: string;
   display_name?: string;
   skill_level?: number;
-  preferred_sport?: PreferredSport;
+  preferred_sport?: SportOptions;
   is_competitive?: boolean;
   city?: string;
   zip_code?: string;
   allow_direct_contact?: boolean;
+  role?: UserRole;
 }
