@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse, SignInRequest, SignInResponse } from '../types';
+import { ApiResponse, RegistrationFormData, RegistrationResponse, SignInRequest, SignInResponse, AuthUser } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
@@ -70,18 +70,18 @@ export class AuthController {
       const result = await AuthService.signIn(signInData);
 
       if (result.success) {
-        const response: ApiResponse<SignInResponse> = {
+        const response: ApiResponse<AuthUser> = {
           success: true,
           message: result.message || 'Sign in successful',
-          data: result,
+          data: result.user,
           timestamp: new Date().toISOString(),
         };
         res.status(200).json(response);
       } else {
-        const response: ApiResponse<SignInResponse> = {
+        const response: ApiResponse<AuthUser> = {
           success: false,
           error: result.error || 'Failed to sign in user',
-          data: result,
+          data: result.user,
           timestamp: new Date().toISOString(),
         };
         res.status(401).json(response);

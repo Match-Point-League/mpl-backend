@@ -9,17 +9,22 @@ export interface SignInRequest {
   password: string;
 }
 
+/**
+ * User data returned in authentication responses
+ */
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  displayName: string;
+}
+
 export interface SignInResponse {
   success: boolean;
   message?: string;
   error?: string;
   token?: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    displayName: string;
-  };
+  user?: AuthUser;
 }
 
 export interface FirebaseUser {
