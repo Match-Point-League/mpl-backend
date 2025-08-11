@@ -58,3 +58,6 @@ export interface ServerConfig {
 
 export * from './databaseTypes';
 export * from './userTypes';
+export * from './authTypes';
+export * from './registrationTypes';
+export * from './validationTypes';
