@@ -25,11 +25,11 @@ export enum MatchStatus {
  * Individual set score structure
  */
 export interface SetScore {
-  player1: number;
-  player2: number;
+  player1_score: number;
+  player2_score: number;
   tiebreak?: {
-    player1: number;
-    player2: number;
+    player1_score: number;
+    player2_score: number;
   };
 }
 
