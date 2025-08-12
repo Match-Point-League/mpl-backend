@@ -14,6 +14,6 @@ const router = Router();
 router.use(authenticateToken);
 
 // GET /api/v1/users/get-user-by-email
-router.get('/get-user-by-email', UsersController.getUserByEmail);
+router.get('/get-user', UsersController.getUser);
 
 export default router;

@@ -14,7 +14,7 @@ export class UsersController {
    * @param res - The response object
    * @returns void
    */
-  public static async getUserByEmail(req: AuthenticatedRequest, res: Response): Promise<void> {
+  public static async getUser(req: AuthenticatedRequest, res: Response): Promise<void> {
     // Get the email from the authenticated user
     const email = req.user?.email;
 
