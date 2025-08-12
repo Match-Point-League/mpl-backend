@@ -13,8 +13,7 @@ const router = Router();
 // Apply authentication middleware to all users routes
 router.use(authenticateToken);
 
-// GET /api/v1/users/get-user-by-email?email=user@example.com
-// Email passed as a query parameter
+// GET /api/v1/users/get-user-by-email
 router.get('/get-user-by-email', UsersController.getUserByEmail);
 
 export default router;
