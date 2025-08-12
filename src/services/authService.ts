@@ -1,5 +1,5 @@
 import { auth } from '../config/firebase';
-import { SignInRequest, SignInResponse, FirebaseUser, AuthError, CreateUserInput, RegistrationFormData, RegistrationResponse } from '../types';
+import { SignInRequest, SignInResponse, FirebaseUser, CreateUserInput, RegistrationFormData, RegistrationResponse } from '../types';
 import database from '../config/database';
 import { ValidationService } from './validationService';
 
@@ -108,7 +108,7 @@ export class AuthService {
       console.error('Sign up error:', error);
       return {
         success: false,
-        error: this.handleAuthError(error as AuthError),
+        error: this.handleFirebaseError(error),
       };
     }
   }
@@ -266,7 +266,18 @@ export class AuthService {
         throw new Error('Firebase authentication not configured');
       }
 
-      // 1. Verify email and password with Firebase Auth REST API
+      // 1. Get user by email using Firebase Admin SDK
+      let firebaseUser;
+      try {
+        firebaseUser = await auth.getUserByEmail(signInData.email);
+      } catch (error) {
+        return {
+          success: false,
+          error: 'No account found with this email address',
+        };
+      }
+
+      // 2. Verify password using Firebase Auth REST API (Admin SDK doesn't support password verification)
       const firebaseApiKey = process.env.FIREBASE_API_KEY;
       if (!firebaseApiKey) {
         throw new Error('Firebase API key not configured');
@@ -285,16 +296,43 @@ export class AuthService {
         }
       );
 
-      const authData = await authResponse.json() as any;
-
       if (!authResponse.ok) {
-        // Handle Firebase Auth errors
-        const errorMessage = this.handleFirebaseAuthError(authData.error);
-        return {
-          success: false,
-          error: errorMessage,
-        };
+        const authData = await authResponse.json() as any;
+        console.log('❌ Firebase Auth REST API error:', authData);
+        
+        // Provide specific error messages based on Firebase error codes
+        switch (authData.error?.message) {
+          case 'INVALID_PASSWORD':
+            return {
+              success: false,
+              error: 'Incorrect password. Please try again.',
+            };
+          case 'USER_NOT_FOUND':
+            return {
+              success: false,
+              error: 'No account found with this email address',
+            };
+          case 'INVALID_EMAIL':
+            return {
+              success: false,
+              error: 'Please enter a valid email address',
+            };
+          case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+            return {
+              success: false,
+              error: 'Too many failed attempts. Please try again later.',
+            };
+          default:
+            // Fallback to generic error message
+            const errorMessage = this.handleFirebaseError(authData.error);
+            return {
+              success: false,
+              error: errorMessage,
+            };
+        }
       }
+      
+      console.log('✅ Password verified successfully');
 
       // 2. Get user profile from PostgreSQL using email
       const result = await this.db.query(
@@ -311,26 +349,27 @@ export class AuthService {
 
       const userProfile = result.rows[0];
 
-      // 3. Create custom token for the user (using the verified UID)
-      const customToken = await auth.createCustomToken(authData.localId as string);
+      // 3. Create custom token for the user using Firebase Admin SDK
+      const customToken = await auth.createCustomToken(firebaseUser.uid);
 
       return {
         success: true,
         message: 'Sign in successful',
         token: customToken,
         user: {
-          id: authData.localId,  // Return Firebase UID from auth response
+          id: firebaseUser.uid,  // Return Firebase UID from Admin SDK
           email: userProfile.email,
           name: userProfile.name,
           displayName: userProfile.display_name,
           role: userProfile.role, // Include role for access control
+          token: customToken,
         },
       };
     } catch (error) {
       console.error('Sign in error:', error);
       return {
         success: false,
-        error: this.handleAuthError(error as AuthError),
+        error: this.handleFirebaseError(error),
       };
     }
   }
@@ -358,47 +397,52 @@ export class AuthService {
   }
 
   /**
-   * Handle Firebase authentication errors
+   * Unified Firebase error handler for both Admin SDK and REST API errors
    */
-  private static handleAuthError(error: AuthError): string {
-    switch (error.code) {
-      case 'auth/email-already-exists':
-        return 'An account with this email already exists';
-      case 'auth/invalid-email':
-        return 'Invalid email address';
-      case 'auth/weak-password':
-        return 'Password is too weak';
-      case 'auth/user-not-found':
-        return 'User not found';
-      case 'auth/wrong-password':
-        return 'Incorrect password';
-      default:
-        return error.message || 'Authentication failed';
-    }
-  }
-
-  /**
-   * Handle Firebase Auth REST API errors
-   */
-  private static handleFirebaseAuthError(error: any): string {
-    if (!error || !error.message) {
-      return 'Authentication failed';
+  private static handleFirebaseError(error: any): string {
+    // Handle Admin SDK errors
+    if (error.code && typeof error.code === 'string' && error.code.startsWith('auth/')) {
+      switch (error.code) {
+        case 'auth/email-already-exists':
+          return 'An account with this email already exists';
+        case 'auth/invalid-email':
+          return 'Invalid email address';
+        case 'auth/weak-password':
+          return 'Password is too weak';
+        case 'auth/user-not-found':
+          return 'User not found';
+        case 'auth/wrong-password':
+          return 'Incorrect password';
+        case 'auth/user-disabled':
+          return 'This account has been disabled';
+        case 'auth/too-many-requests':
+          return 'Too many failed attempts. Please try again later';
+        default:
+          return error.message || 'Authentication failed';
+      }
     }
 
-    switch (error.message) {
-      case 'EMAIL_NOT_FOUND':
-        return 'No account found with this email address';
-      case 'INVALID_PASSWORD':
-        return 'Incorrect password';
-      case 'USER_DISABLED':
-        return 'This account has been disabled';
-      case 'TOO_MANY_ATTEMPTS_TRY_LATER':
-        return 'Too many failed attempts. Please try again later';
-      case 'INVALID_EMAIL':
-        return 'Invalid email address';
-      default:
-        return error.message || 'Authentication failed';
+    // Handle REST API errors
+    if (error.message) {
+      switch (error.message) {
+        case 'EMAIL_NOT_FOUND':
+          return 'No account found with this email address';
+        case 'INVALID_PASSWORD':
+          return 'Incorrect password';
+        case 'USER_DISABLED':
+          return 'This account has been disabled';
+        case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+          return 'Too many failed attempts. Please try again later';
+        case 'INVALID_EMAIL':
+          return 'Invalid email address';
+        case 'INVALID_LOGIN_CREDENTIALS':
+          return 'Invalid email or password';  
+        default:
+          return error.message || 'Authentication failed';
+      }
     }
+
+    return 'Authentication failed';
   }
 
   /**

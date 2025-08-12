@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse } from '../types';
+import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
@@ -21,11 +21,27 @@ export class AuthController {
       const result = await AuthService.signUp(formData);
 
       if (result.success) {
-        res.status(201).json(result);
+        const response: ApiResponse<SignUpResponseData> = {
+          success: true,
+          message: result.message || 'Account created successfully',
+          data: {
+            userId: result.userId!,
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(201).json(response);
       } else {
         // Handle validation errors or other errors
         const statusCode = result.validationErrors ? 400 : 500;
-        res.status(statusCode).json(result);
+        const response: ApiResponse<SignUpResponseData> = {
+          success: false,
+          error: result.error || 'Failed to sign up user',
+          data: {
+            validationErrors: result.validationErrors,
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(statusCode).json(response);
       }
     } catch (error: unknown) {
       console.error('Signup error:', error);
@@ -33,6 +49,65 @@ export class AuthController {
       const response: ApiResponse = {
         success: false,
         error: 'Failed to sign up user',
+        timestamp: new Date().toISOString(),
+      };
+      
+      res.status(500).json(response);
+    }
+  }
+
+  /**
+   * Handles user sign-in
+   * POST /api/v1/auth/signin
+   * 
+   * This endpoint:
+   * 1. Accepts email and password
+   * 2. Authenticates with Firebase
+   * 3. Retrieves user profile from PostgreSQL
+   * 4. Returns authentication token and user data
+   */
+  public static async signIn(req: Request, res: Response): Promise<void> {
+    try {
+      const signInData: SignInRequest = req.body;
+
+      // Use AuthService to handle sign-in
+      const result = await AuthService.signIn(signInData);
+
+      if (result.success) {
+        const response: ApiResponse<AuthUser> = {
+          success: true,
+          message: result.message || 'Sign in successful',
+          data: {
+            id: result.user?.id || '',
+            email: result.user?.email || '',
+            name: result.user?.name || '',
+            displayName: result.user?.displayName || '',
+            token: result.token || ''
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(200).json(response);
+      } else {
+        const response: ApiResponse<AuthUser> = {
+          success: false,
+          error: result.error || 'Failed to sign in user',
+          data: {
+            id: result.user?.id || '',
+            email: result.user?.email || '',
+            name: result.user?.name || '',
+            displayName: result.user?.displayName || '',
+            token: result.token || ''
+          },
+          timestamp: new Date().toISOString(),
+        };
+        res.status(401).json(response);
+      }
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      
+      const response: ApiResponse = {
+        success: false,
+        error: 'Failed to sign in user',
         timestamp: new Date().toISOString(),
       };
       

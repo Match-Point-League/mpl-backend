@@ -27,5 +27,13 @@ export interface RegistrationResponse {
   warning?: string;  // Added for graceful degradation warnings
 }
 
+/**
+ * Clean response data for sign-up endpoint - contains only essential fields
+ */
+export type SignUpResponseData = {
+  userId?: string;
+  validationErrors?: ValidationErrors;
+};
+
 // Re-export for backward compatibility
 export type RegistrationErrors = ValidationErrors; 
