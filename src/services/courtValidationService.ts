@@ -75,7 +75,7 @@ export class CourtValidationService {
       { field: 'state', test: validateState(courtData.state), error: 'Invalid state' },
       { field: 'zip_code', test: validateZipCodeFormat(courtData.zip_code), error: 'Invalid ZIP code format' },
       
-      // Business logic
+      // Other validations
       { field: 'is_indoor', test: courtData.is_indoor !== undefined, error: 'Indoor/outdoor status required' },
       { field: 'sport', test: courtData.sport?.trim().length > 0, error: 'Sport is required' },
       { field: 'lights', test: !(courtData.is_indoor && courtData.lights !== undefined), error: 'Lights not applicable for indoor courts' },
