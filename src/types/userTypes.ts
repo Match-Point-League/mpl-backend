@@ -27,6 +27,19 @@ export type User = {
   updated_at: Date;
 }
 
+export type UserProfile = {
+  id: string;
+  email: string;
+  name: string;
+  display_name: string;
+  skill_level: number;
+  preferred_sport: SportOptions;
+  is_competitive: boolean;
+  city: string;
+  zip_code: string;
+  allow_direct_contact: boolean;
+}
+
 /**
  * Input type for creating a new user account.
  * This type includes all required and optional fields needed to register a new user.

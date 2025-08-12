@@ -1,24 +1,25 @@
-import { Request, Response } from 'express';
-import { ApiResponse } from '../types';
+import { Response } from 'express';
+import { ApiResponse, UserProfile } from '../types';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
 export class UsersController {
 
   private static db: Pool = database.getPool();
 
-  public static async getUserByEmail(req: Request, res: Response): Promise<void> {
-    // Get the email from the query parameters
-    const email = req.query.email as string;
+  public static async getUserByEmail(req: AuthenticatedRequest, res: Response): Promise<void> {
+    // Get the email from the authenticated user
+    const email = req.user?.email;
 
-    // Validate the email
-    if (!email) {
+    // Validate that the authenticated user's email matches the requested email (if provided)
+    if (!req.user?.emailVerified) {
       const response: ApiResponse = {
         success: false,
-        error: 'Email query parameter is required',
+        error: 'Access denied: You can only access your own user data',
         timestamp: new Date().toISOString(),
       };
-      res.status(400).json(response);
+      res.status(403).json(response);
       return;
     }
 
@@ -40,7 +41,7 @@ export class UsersController {
       // If the user is found, return the user
       const response: ApiResponse = {
         success: true,
-        data: result.rows[0],
+        data: result.rows[0] as UserProfile,
         timestamp: new Date().toISOString(),
       };
       res.json(response);
