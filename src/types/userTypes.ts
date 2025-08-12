@@ -9,6 +9,16 @@ export enum SportOptions {
 }
 
 /**
+ * Enum representing user roles in the Match Point League application.
+ * This enum defines the available role options for user accounts.
+ */
+export enum UserRole {
+  PLAYER = 'player',
+  ADMIN = 'admin',
+  SUPERADMIN = 'superadmin'
+}
+
+/**
  * Complete user profile type representing a user in the Match Point League system.
  * This type includes all user information stored in the database.
  */
@@ -23,6 +33,7 @@ export type User = {
   city: string;
   zip_code: string;
   allow_direct_contact: boolean;
+  role: UserRole;
   created_at: Date;
   updated_at: Date;
 }
@@ -41,6 +52,7 @@ export type CreateUserInput = {
   city: string;
   zip_code: string;
   allow_direct_contact?: boolean;
+  role: UserRole;
 }
 
 /**
@@ -56,4 +68,5 @@ export type UpdateUserInput = {
   city?: string;
   zip_code?: string;
   allow_direct_contact?: boolean;
+  role?: UserRole;
 }
