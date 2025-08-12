@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser } from '../types';
+import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser, UserRole } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
@@ -82,6 +82,7 @@ export class AuthController {
             email: result.user?.email || '',
             name: result.user?.name || '',
             displayName: result.user?.displayName || '',
+            role: result.user?.role || UserRole.PLAYER,
             token: result.token || ''
           },
           timestamp: new Date().toISOString(),
@@ -96,6 +97,7 @@ export class AuthController {
             email: result.user?.email || '',
             name: result.user?.name || '',
             displayName: result.user?.displayName || '',
+            role: result.user?.role || UserRole.PLAYER,
             token: result.token || ''
           },
           timestamp: new Date().toISOString(),

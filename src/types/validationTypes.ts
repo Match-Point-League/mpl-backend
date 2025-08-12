@@ -2,6 +2,8 @@
  * Validation-related types for the backend
  */
 
+import { UserRole } from './userTypes';
+
 /**
  * ZIP code lookup response from external API
  */
@@ -32,7 +34,7 @@ export interface ValidationErrors {
   preferredSports?: string;
   skillLevel?: string;
   zipCode?: string;
-  role?: string;
+  role?: UserRole;
   general?: string;
   confirmEmail?: string;
   confirmPassword?: string;
