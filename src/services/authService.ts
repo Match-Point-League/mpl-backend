@@ -1,7 +1,7 @@
 import { auth } from '../config/firebase';
 import { SignInRequest, SignInResponse, FirebaseUser, CreateUserInput, RegistrationFormData, RegistrationResponse } from '../types';
 import database from '../config/database';
-import { ValidationService } from './validationService';
+import { RegistrationValidationService } from './registrationValidationService';
 
 export class AuthService {
   private static db = database.getPool();
@@ -16,7 +16,7 @@ export class AuthService {
       }
 
       // 1. Validate registration data
-      const validationResult = await ValidationService.validateRegistrationData(signUpData);
+      const validationResult = await RegistrationValidationService.validateRegistrationData(signUpData);
       if (!validationResult.isValid) {
         return {
           success: false,
@@ -38,7 +38,7 @@ export class AuthService {
         name: signUpData.fullName,
         display_name: signUpData.displayName,
         skill_level: signUpData.skillLevel,
-        preferred_sport: ValidationService.mapSportsToPreferredSport(signUpData.preferredSports),
+        preferred_sport: RegistrationValidationService.mapSportsToPreferredSport(signUpData.preferredSports),
         is_competitive: false, // Default value
         city: validationResult.cityInfo?.fullLocation || '',
         zip_code: signUpData.zipCode,

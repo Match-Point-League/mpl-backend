@@ -3,7 +3,7 @@ import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationRe
 /**
  * Service for validating registration form data
  */
-export class ValidationService {
+export class RegistrationValidationService {
   /**
    * Validates ZIP code format
    */
