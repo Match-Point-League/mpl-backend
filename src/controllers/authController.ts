@@ -27,10 +27,10 @@ export class AuthController {
         const statusCode = result.validationErrors ? 400 : 500;
         res.status(statusCode).json(result);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Signup error:', error);
       
-      const response = {
+      const response: ApiResponse = {
         success: false,
         error: 'Failed to sign up user',
         timestamp: new Date().toISOString(),
