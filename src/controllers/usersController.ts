@@ -8,6 +8,12 @@ export class UsersController {
 
   private static db: Pool = database.getPool();
 
+  /**
+   * Get the user by email
+   * @param req - The authenticated request object
+   * @param res - The response object
+   * @returns void
+   */
   public static async getUserByEmail(req: AuthenticatedRequest, res: Response): Promise<void> {
     // Get the email from the authenticated user
     const email = req.user?.email;
