@@ -16,4 +16,7 @@ router.use(authenticateToken);
 // GET /api/v1/users/get-user-by-email
 router.get('/get-user-by-email', UsersController.getUserByEmail);
 
+// PUT /api/v1/users/update-user
+router.put('/update-user', UsersController.updateUser);
+
 export default router;
