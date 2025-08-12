@@ -25,7 +25,10 @@ export class UsersController {
 
     try {
       // Get the user from the database
-      const result = await UsersController.db.query('SELECT * FROM users WHERE email = $1', [email]);
+      const result = await UsersController.db.query(
+        'SELECT id, email, name, display_name, skill_level, preferred_sport, is_competitive, city, zip_code, allow_direct_contact FROM users WHERE email = $1', 
+        [email]
+      );
 
       // If the user is not found, return a 404 error
       if (result.rows.length === 0) {
