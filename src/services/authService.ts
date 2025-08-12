@@ -237,15 +237,15 @@ export class AuthService {
       const storedData = result.rows[0];
       const missingFields: string[] = [];
 
+      // Define the fields to check
+      const fields: (keyof CreateUserInput)[] = ['email', 'name', 'display_name', 'skill_level', 'preferred_sport', 'city', 'zip_code', 'role'];
+
       // Check each field for completeness
-      if (!storedData.email || storedData.email !== userData.email) missingFields.push('email');
-      if (!storedData.name || storedData.name !== userData.name) missingFields.push('name');
-      if (!storedData.display_name || storedData.display_name !== userData.display_name) missingFields.push('display_name');
-      if (!storedData.skill_level || storedData.skill_level !== userData.skill_level) missingFields.push('skill_level');
-      if (!storedData.preferred_sport || storedData.preferred_sport !== userData.preferred_sport) missingFields.push('preferred_sport');
-      if (!storedData.city || storedData.city !== userData.city) missingFields.push('city');
-      if (!storedData.zip_code || storedData.zip_code !== userData.zip_code) missingFields.push('zip_code');
-      if (!storedData.role || storedData.role !== userData.role) missingFields.push('role');
+      for (const field of fields) {
+        if (!storedData[field] || storedData[field] !== userData[field]) {
+          missingFields.push(field);
+        }
+      }
 
       return {
         isComplete: missingFields.length === 0,
