@@ -2,6 +2,7 @@ import { Router } from 'express';
 import healthRoutes from './healthRoutes';
 import usersRoutes from './usersRoutes';
 import authRoutes from './authRoutes';
+import courtsRoutes from './courtsRoutes';
 
 const router = Router();
 
@@ -19,5 +20,8 @@ router.use('/auth', authRoutes);
 
 // Users routes
 router.use('/users', usersRoutes);
+
+// Courts routes
+router.use('/courts', courtsRoutes);
 
 export default router;
