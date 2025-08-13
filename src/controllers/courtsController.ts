@@ -242,4 +242,38 @@ export class CourtsController {
       res.status(500).json(response);
     }
   }
+
+  /**
+   * Retrieves all courts by verification status
+   * @param req - Request with verification status in params
+   * @param res - Express response object
+   */
+  public static async getCourtsByVerified(req: Request, res: Response): Promise<void> {
+    try {
+      const { verified } = req.params;
+
+      // Validate that verified parameter exists
+      if (!verified) {
+        res.status(400).json(CourtsController.createErrorResponse('Verification status is required', 400));
+        return;
+      }
+
+      // Convert string parameter to boolean
+      const isVerified = verified === 'true';
+
+      // Query the database for courts matching verification status
+      const result = await CourtsController.db.query(
+        'SELECT name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = $1',
+        [isVerified]
+      );
+
+      // Return the courts array (already in PublicCourtResponse format)
+      res.status(200).json(CourtsController.createSuccessResponse(result.rows, 'Courts retrieved successfully'));
+
+    } catch (error) {
+      console.error('Error retrieving courts by verification status:', error);
+      const response = CourtsController.createErrorResponse('Failed to retrieve courts', 500);
+      res.status(500).json(response);
+    }
+  }
 }
