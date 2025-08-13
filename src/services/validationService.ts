@@ -1,4 +1,4 @@
-import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData, UpdateUserInput } from '../types';
+import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData, UpdateUserInput, UserRole } from '../types';
 
 /**
  * Service for validating registration form data
@@ -274,5 +274,12 @@ export class ValidationService {
     } else {
       return SportOptions.TENNIS;
     }
+  }
+
+  /**
+   * Get default role for new users
+   */
+  public static getDefaultRole(): UserRole {
+    return UserRole.PLAYER;
   }
 } 
