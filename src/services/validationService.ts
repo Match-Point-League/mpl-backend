@@ -1,4 +1,4 @@
-import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
+import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData, UserRole } from '../types';
 
 /**
  * Service for validating registration form data
@@ -102,8 +102,8 @@ export class ValidationService {
       errors.preferredSports = 'Please select at least one sport';
     } else {
       // Validate that only valid sports are selected
-      const validSports = ['tennis', 'pickleball'];
-      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase()));
+      const validSports = [SportOptions.TENNIS, SportOptions.PICKLEBALL];
+      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase() as SportOptions));
       if (invalidSports.length > 0) {
         errors.preferredSports = `Invalid sports selected: ${invalidSports.join(', ')}. Only tennis and pickleball are allowed.`;
       }
@@ -155,5 +155,12 @@ export class ValidationService {
     } else {
       return SportOptions.TENNIS;
     }
+  }
+
+  /**
+   * Get default role for new users
+   */
+  public static getDefaultRole(): UserRole {
+    return UserRole.PLAYER;
   }
 } 

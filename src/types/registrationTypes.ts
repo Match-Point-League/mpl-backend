@@ -24,6 +24,7 @@ export interface RegistrationResponse {
   error?: string;
   userId?: string;  // Added to match backend response
   validationErrors?: ValidationErrors;
+  warning?: string;  // Added for graceful degradation warnings
 }
 
 /**
