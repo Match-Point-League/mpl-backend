@@ -29,6 +29,7 @@ export interface Court {
  * This type includes only the fields that should be visible to public users
  */
 export interface PublicCourtResponse {
+  id: string;
   name: string;
   address_line: string;
   city: string;

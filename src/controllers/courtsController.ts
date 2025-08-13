@@ -223,7 +223,7 @@ export class CourtsController {
 
       // Query the database for the court
       const result = await CourtsController.db.query(
-        'SELECT name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE id = $1',
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE id = $1',
         [id]
       );
 
@@ -263,7 +263,7 @@ export class CourtsController {
 
       // Query the database for courts matching verification status
       const result = await CourtsController.db.query(
-        'SELECT name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = $1',
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = $1',
         [isVerified]
       );
 
