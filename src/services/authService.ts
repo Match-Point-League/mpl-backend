@@ -43,7 +43,6 @@ export class AuthService {
         city: validationResult.cityInfo?.fullLocation || '',
         zip_code: signUpData.zipCode,
         allow_direct_contact: false, // Default value
-        role: ValidationService.getDefaultRole(), // Default role for new users
       };
 
       // 4. Store user profile in PostgreSQL with retry
@@ -238,7 +237,7 @@ export class AuthService {
       const missingFields: string[] = [];
 
       // Define the fields to check
-      const fields: (keyof CreateUserInput)[] = ['email', 'name', 'display_name', 'skill_level', 'preferred_sport', 'city', 'zip_code', 'role'];
+      const fields: (keyof CreateUserInput)[] = ['email', 'name', 'display_name', 'skill_level', 'preferred_sport', 'city', 'zip_code'];
 
       // Check each field for completeness
       for (const field of fields) {
@@ -361,7 +360,6 @@ export class AuthService {
           email: userProfile.email,
           name: userProfile.name,
           displayName: userProfile.display_name,
-          role: userProfile.role, // Include role for access control
           token: customToken,
         },
       };
