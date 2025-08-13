@@ -4,20 +4,7 @@ import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import database from '../config/database';
 import { Pool } from 'pg';
 import { CourtValidationService } from '../services/courtValidationService';
-import { CreateCourtInput, Court } from '../types/courtTypes';
-import { SportOptions } from '../types/userTypes';
-
-// Type for court data from request body (without created_by)
-interface CourtRequestBody {
-  name: string;
-  address_line: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  is_indoor: boolean;
-  lights?: boolean;
-  sport: string;
-}
+import { CreateCourtInput, Court, SportOptions, CourtsRequestInput } from '../types';
 
 export class CourtsController {
 
@@ -133,7 +120,7 @@ export class CourtsController {
    * @param userId - ID of the authenticated user
    * @returns Prepared court data for database
    */
-  private static prepareCourtData(courtData: CourtRequestBody, userId: string): CreateCourtInput & { verified: boolean; created_by: string } {
+  private static prepareCourtData(courtData: CourtsRequestInput, userId: string): CreateCourtInput & { verified: boolean; created_by: string } {
     return {
       name: courtData.name,
       address_line: courtData.address_line,
@@ -162,7 +149,7 @@ export class CourtsController {
       }
 
       // Extract court data from request body
-      const courtData: CourtRequestBody = req.body;
+      const courtData: CourtsRequestInput = req.body;
       const { name, address_line, city, state, zip_code, is_indoor, lights, sport } = courtData;
 
       // Validate court data using our comprehensive validation service

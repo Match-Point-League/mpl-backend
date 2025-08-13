@@ -56,3 +56,14 @@ export interface UpdateCourtInput {
   sport?: SportOptions;
   verified?: boolean;
 }
+
+export interface CourtsRequestInput {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: string;
+}
