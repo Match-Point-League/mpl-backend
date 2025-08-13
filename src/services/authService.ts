@@ -43,6 +43,7 @@ export class AuthService {
         city: validationResult.cityInfo?.fullLocation || '',
         zip_code: signUpData.zipCode,
         allow_direct_contact: false, // Default value
+        role: ValidationService.getDefaultRole(),
       };
 
       // 4. Store user profile in PostgreSQL with retry

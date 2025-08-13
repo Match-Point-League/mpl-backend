@@ -19,7 +19,8 @@
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:status": "node-pg-migrate status",
-    "migrate:up:prod": "NODE_ENV=production node-pg-migrate up"
+    "migrate:up:prod": "NODE_ENV=production node-pg-migrate up",
+    "change-role": "node scripts/changeRoleScript.js"
   },
   "keywords": [
     "tennis",
