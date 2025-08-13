@@ -17,7 +17,6 @@ export enum MatchStatus {
   CONFIRMED = 'confirmed',
   SCORE_REPORTED = 'score reported',
   SCORE_VERIFIED = 'score verified',
-  COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
 
