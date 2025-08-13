@@ -82,7 +82,6 @@ export class AuthController {
             email: result.user?.email || '',
             name: result.user?.name || '',
             displayName: result.user?.displayName || '',
-            role: result.user?.role || UserRole.PLAYER,
             token: result.token || ''
           },
           timestamp: new Date().toISOString(),
@@ -97,7 +96,6 @@ export class AuthController {
             email: result.user?.email || '',
             name: result.user?.name || '',
             displayName: result.user?.displayName || '',
-            role: result.user?.role || UserRole.PLAYER,
             token: result.token || ''
           },
           timestamp: new Date().toISOString(),

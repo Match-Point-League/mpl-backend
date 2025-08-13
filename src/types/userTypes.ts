@@ -51,7 +51,6 @@ export type CreateUserInput = {
   city: string;
   zip_code: string;
   allow_direct_contact?: boolean;
-  role: UserRole;
 }
 
 /**

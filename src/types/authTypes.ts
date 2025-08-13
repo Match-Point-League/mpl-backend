@@ -19,7 +19,6 @@ export interface AuthUser {
   email: string;
   name: string;
   displayName: string;
-  role: UserRole;
   token: string;
 }
 
