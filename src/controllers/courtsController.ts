@@ -213,7 +213,7 @@ export class CourtsController {
    */
   public static async getCourtById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id } = req.query;
 
       // Validate that ID parameter exists
       if (!id) {
@@ -250,7 +250,7 @@ export class CourtsController {
    */
   public static async getCourtsByVerified(req: Request, res: Response): Promise<void> {
     try {
-      const { verified } = req.params;
+      const { verified } = req.query;
 
       // Validate that verified parameter exists
       if (!verified) {
