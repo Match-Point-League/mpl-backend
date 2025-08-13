@@ -72,3 +72,46 @@ export interface UpdateCourtInput {
   sport?: SportOptions;
   verified?: boolean;
 }
+
+export interface CourtsRequestInput {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: string;
+}
+
+/**
+ * Court validation input interface
+ */
+export interface CourtValidationInput {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: string;
+}
+
+/**
+ * Court validation result interface
+ */
+export interface CourtValidationResult {
+  isValid: boolean;
+  errors: {
+    name?: string;
+    address_line?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    is_indoor?: string;
+    lights?: string;
+    sport?: string;
+  };
+  warnings: string[];
+}
