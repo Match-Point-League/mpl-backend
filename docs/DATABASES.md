@@ -24,7 +24,7 @@
 - `sport` (varchar(20), enum: 'tennis', 'pickleball', not null)
 - `match_time` (timestamp with time zone, not null)
 - `court_id` (UUID, foreign key to courts.id, not null)
-- `status` (varchar(20), enum: 'pending', 'confirmed', 'score reported', 'score verified', 'completed', 'cancelled', not null, default: 'pending')
+- `status` (varchar(20), enum: 'pending', 'confirmed', 'score reported', 'score verified', 'cancelled', not null, default: 'pending')
 - `score` (jsonb, nullable)  
   - Example format:  
     ```json
