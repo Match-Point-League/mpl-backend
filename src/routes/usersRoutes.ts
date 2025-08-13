@@ -1,15 +1,22 @@
 import { Router } from 'express';
 import { UsersController } from '../controllers';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
 
 /**
- * Health check routes
- * Base path: /api/v1/health
+ * Users routes
+ * Base path: /api/v1/users
+ * All routes require authentication
  */
 
-// GET /api/v1/users/get-user-by-email?email=user@example.com
-// Email passed as a query parameter
-router.get('/get-user-by-email', UsersController.getUserByEmail);
+// Apply authentication middleware to all users routes
+router.use(authenticateToken);
+
+// GET /api/v1/users/get-user
+router.get('/get-user', UsersController.getUser);
+
+// PUT /api/v1/users/update-user
+router.put('/update-user', UsersController.updateUser);
 
 export default router;
