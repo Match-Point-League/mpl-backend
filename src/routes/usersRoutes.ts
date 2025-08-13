@@ -13,7 +13,7 @@ const router = Router();
 // Apply authentication middleware to all users routes
 router.use(authenticateToken);
 
-// GET /api/v1/users/get-user-by-email
+// GET /api/v1/users/get-user
 router.get('/get-user', UsersController.getUser);
 
 // PUT /api/v1/users/update-user
