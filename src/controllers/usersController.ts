@@ -3,6 +3,7 @@ import { ApiResponse, UserProfile, UpdateUserInput } from '../types';
 import database from '../config/database';
 import { Pool } from 'pg';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import { ValidationService } from '../services/validationService';
 
 export class UsersController {
 
@@ -85,6 +86,21 @@ export class UsersController {
       return;
     }
 
+    // Validate the update data
+    const validationResult = await ValidationService.validateUpdateUserData(updateData);
+    if (!validationResult.isValid) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Invalid update data',
+        data: {
+          validationErrors: validationResult.errors,
+        },
+        timestamp: new Date().toISOString(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
     try {
       // Prepare the update fields and values
       const updateFields: string[] = [];
@@ -107,6 +123,12 @@ export class UsersController {
         };
         res.status(400).json(response);
         return;
+      }
+
+      // Update the city if the zip code is provided and the city info is valid
+      if (updateData.zip_code && validationResult.cityInfo) {
+        updateFields.push('city = $${paramIndex++}');
+        values.push(validationResult.cityInfo.city);
       }
 
       values.push(req.user.email);
