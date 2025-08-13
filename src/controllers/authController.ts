@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser, UserRole } from '../types';
+import { ApiResponse, RegistrationFormData, RegistrationResponse, SignUpResponseData, SignInRequest, AuthUser } from '../types';
 import { AuthService } from '../services/authService';
 
 export class AuthController {
@@ -43,7 +43,7 @@ export class AuthController {
         };
         res.status(statusCode).json(response);
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Signup error:', error);
       
       const response: ApiResponse = {
