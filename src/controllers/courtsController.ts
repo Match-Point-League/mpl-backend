@@ -1,11 +1,9 @@
-import { Response } from 'express';
-import { ApiResponse } from '../types';
+import { Response, Request } from 'express';
+import { ApiResponse, CreateCourtInput, Court, SportOptions } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import database from '../config/database';
 import { Pool } from 'pg';
 import { CourtValidationService } from '../services/courtValidationService';
-import { CreateCourtInput, Court } from '../types/courtTypes';
-import { SportOptions } from '../types/userTypes';
 
 // Type for court data from request body (without created_by)
 interface CourtRequestBody {
@@ -205,6 +203,43 @@ export class CourtsController {
     } catch (error) {
       console.error('Error creating court:', error);
       CourtsController.handleDatabaseError(error, res);
+    }
+  }
+
+  /**
+   * Retrieves a specific court by ID
+   * @param req - Request with court ID in params
+   * @param res - Express response object
+   */
+  public static async getCourtById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      // Validate that ID parameter exists
+      if (!id) {
+        res.status(400).json(CourtsController.createErrorResponse('Court ID is required', 400));
+        return;
+      }
+
+      // Query the database for the court
+      const result = await CourtsController.db.query(
+        'SELECT name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE id = $1',
+        [id]
+      );
+
+      // Check if court was found
+      if (result.rows.length === 0) {
+        res.status(404).json(CourtsController.createErrorResponse('Court not found', 404));
+        return;
+      }
+
+      // Return the court data (already in PublicCourtResponse format)
+      res.status(200).json(CourtsController.createSuccessResponse(result.rows[0], 'Court retrieved successfully'));
+
+    } catch (error) {
+      console.error('Error retrieving court:', error);
+      const response = CourtsController.createErrorResponse('Failed to retrieve court', 500);
+      res.status(500).json(response);
     }
   }
 }
