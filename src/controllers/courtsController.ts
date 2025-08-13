@@ -11,24 +11,6 @@ export class CourtsController {
   private static db: Pool = database.getPool();
 
   /**
-   * Validates the lights field based on indoor/outdoor status
-   * @param isIndoor - Whether the court is indoor
-   * @param lights - The lights value to validate
-   * @returns Error message if validation fails, undefined if valid
-   */
-  private static validateLightsField(isIndoor: boolean, lights: boolean | undefined): string | undefined {
-    if (isIndoor && lights !== undefined) {
-      return 'Lights field is not applicable for indoor courts';
-    }
-    
-    if (!isIndoor && (lights === undefined || lights === null)) {
-      return 'Lights field is required for outdoor courts';
-    }
-    
-    return undefined; // Validation passed
-  }
-
-  /**
    * Creates an error response with consistent format
    * @param error - Error message
    * @param statusCode - HTTP status code (default: 400)
@@ -169,12 +151,6 @@ export class CourtsController {
         return;
       }
 
-      // Validate lights field logic (business rule validation)
-      const lightsValidationError = CourtsController.validateLightsField(is_indoor, lights);
-      if (lightsValidationError) {
-        res.status(400).json(CourtsController.createErrorResponse(lightsValidationError));
-        return;
-      }
 
       // Add any warnings to the response (for future use with external validation)
       if (validationResult.warnings.length > 0) {

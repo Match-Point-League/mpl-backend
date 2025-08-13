@@ -16,3 +16,6 @@ export * from './addressValidation';
 
 // Sport validation
 export * from './sportValidation';
+
+// Lights validation
+export * from './lightsValidation';
