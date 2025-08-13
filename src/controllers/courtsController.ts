@@ -153,7 +153,7 @@ export class CourtsController {
       const { name, address_line, city, state, zip_code, is_indoor, lights, sport } = courtData;
 
       // Validate court data using our comprehensive validation service
-      const validationResult = CourtValidationService.validateCourtData({
+      const validationResult = await CourtValidationService.validateCourtData({
         name,
         address_line,
         city,

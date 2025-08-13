@@ -11,6 +11,7 @@ import {
   validateCityFormat,
   validateZipCodeFormat,
   validateState,
+  validateStateAgainstZipCode,
   VALIDATION_RULES
 } from '../utils/validation';
 import { CourtValidationInput, CourtValidationResult } from '../types/courtTypes';
@@ -25,13 +26,12 @@ export class CourtValidationService {
    * @param courtData - The court data to validate
    * @returns Validation result with errors and warnings
    */
-  public static validateCourtData(courtData: CourtValidationInput): CourtValidationResult {
+  public static async validateCourtData(courtData: CourtValidationInput): Promise<CourtValidationResult> {
     const errors: any = {};
     const warnings: string[] = [];
 
-    // All validations in one array
-    const allValidations = [
-      // Basic validations
+    // Basic validations (synchronous)
+    const basicValidations = [
       { field: 'name', test: validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH), error: 'Name must be 2-255 characters' },
       { field: 'address_line', test: validateStringLength(courtData.address_line, VALIDATION_RULES.MIN_ADDRESS_LENGTH, VALIDATION_RULES.MAX_ADDRESS_LENGTH), error: 'Address must be 2-255 characters' },
       { field: 'city', test: validateStringLength(courtData.city, 2, 100), error: 'City must be 2-100 characters' },
@@ -41,7 +41,7 @@ export class CourtValidationService {
       // Format validations
       { field: 'address_line', test: validateAddressFormat(courtData.address_line), error: 'Invalid address format' },
       { field: 'city', test: validateCityFormat(courtData.city), error: 'Invalid city format' },
-      { field: 'state', test: validateState(courtData.state), error: 'Invalid state' },
+      { field: 'state', test: validateState(courtData.state), error: 'Invalid state format' },
       { field: 'zip_code', test: validateZipCodeFormat(courtData.zip_code), error: 'Invalid ZIP code format' },
       
       // Other validations
@@ -51,10 +51,19 @@ export class CourtValidationService {
       { field: 'lights', test: !(!courtData.is_indoor && courtData.lights === undefined), error: 'Lights required for outdoor courts' }
     ];
 
-    // Single loop - no if statements
-    allValidations.forEach(({ field, test, error }) => {
+    // Run basic validations
+    basicValidations.forEach(({ field, test, error }) => {
       if (!test) errors[field] = error;
     });
+
+    // Advanced validations (asynchronous) - only if basic validations pass
+    if (Object.keys(errors).length === 0) {
+      // Validate state against ZIP code using external API
+      const stateMatchesZipCode = await validateStateAgainstZipCode(courtData.state, courtData.zip_code);
+      if (!stateMatchesZipCode) {
+        errors.state = 'State does not match ZIP code';
+      }
+    }
 
     return { isValid: Object.keys(errors).length === 0, errors, warnings };
   }

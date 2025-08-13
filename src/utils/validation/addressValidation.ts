@@ -2,7 +2,7 @@
  * Address validation utilities for the Match Point League application
  */
 
-import { US_STATES, VALIDATION_RULES } from './constants';
+import { VALIDATION_RULES } from './constants';
 import { validateAddressFormat } from './stringValidation';
 
 /**
@@ -29,7 +29,51 @@ export function validateState(state: string): boolean {
   }
 
   const normalizedState = state.trim().toUpperCase();
-  return US_STATES.includes(normalizedState as any);
+  
+  // Basic format validation: 2 uppercase letters
+  // Note: Actual state validation should be done through ZIP code API
+  // This is just a basic format check
+  return /^[A-Z]{2}$/.test(normalizedState);
+}
+
+/**
+ * Validates state against ZIP code using external API
+ * This provides more accurate validation than hardcoded state lists
+ * @param state - The state abbreviation to validate
+ * @param zipCode - The ZIP code to validate against
+ * @returns Promise<boolean> - true if state matches ZIP code, false otherwise
+ */
+export async function validateStateAgainstZipCode(state: string, zipCode: string): Promise<boolean> {
+  if (!state || !zipCode) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`https://api.zippopotam.us/US/${zipCode}`);
+    
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json() as {
+      places?: Array<{
+        'place name': string;
+        'state abbreviation': string;
+      }>;
+    };
+    
+    if (!data.places || data.places.length === 0) {
+      return false;
+    }
+
+    const place = data.places[0];
+    const apiState = place['state abbreviation'];
+    
+    return state.trim().toUpperCase() === apiState;
+  } catch (error) {
+    console.error('Error validating state against ZIP code:', error);
+    return false;
+  }
 }
 
 /**
