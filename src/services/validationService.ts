@@ -1,4 +1,4 @@
-import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData } from '../types';
+import { SportOptions, ZipCodeResponse, CityInfo, ValidationErrors, ValidationResult, RegistrationFormData, UpdateUserInput } from '../types';
 
 /**
  * Service for validating registration form data
@@ -49,99 +49,218 @@ export class ValidationService {
   }
 
   /**
+   * Validates full name field
+   */
+  private static validateFullName(fullName: string | undefined): string | null {
+    if (!fullName?.trim()) {
+      return 'Full name is required';
+    }
+    if (fullName.trim().length < 2) {
+      return 'Full name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  /**
+   * Validates email field
+   */
+  private static validateEmail(email: string | undefined): string | null {
+    if (!email) {
+      return 'Email is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  /**
+   * Validates confirm email field
+   */
+  private static validateConfirmEmail(confirmEmail: string | undefined, email: string | undefined): string | null {
+    if (!confirmEmail) {
+      return 'Please confirm your email';
+    }
+    if (email !== confirmEmail) {
+      return 'Email addresses do not match';
+    }
+    return null;
+  }
+
+  /**
+   * Validates password field
+   */
+  private static validatePassword(password: string | undefined): string | null {
+    if (!password) {
+      return 'Password is required';
+    }
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+    return null;
+  }
+
+  /**
+   * Validates confirm password field
+   */
+  private static validateConfirmPassword(confirmPassword: string | undefined, password: string | undefined): string | null {
+    if (!confirmPassword) {
+      return 'Please confirm your password';
+    }
+    if (password !== confirmPassword) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+
+  /**
+   * Validates display name field
+   */
+  private static validateDisplayName(displayName: string | undefined): string | null {
+    if (!displayName) {
+      return 'Display name is required';
+    }
+    return null;
+  }
+
+  /**
+   * Validates preferred sports field
+   */
+  private static validatePreferredSports(preferredSports: string[] | undefined): string | null {
+    if (!preferredSports || preferredSports.length === 0) {
+      return 'Please select at least one sport';
+    }
+    
+    // Ensure only valid sports are selected
+    const validSports = Object.values(SportOptions).map(sport => sport.toLowerCase());
+    const invalidSports = preferredSports.filter(sport => !validSports.includes(sport.toLowerCase()));
+    if (invalidSports.length > 0) {
+      return `Invalid sports selected: ${invalidSports.join(', ')}. Only tennis and pickleball are allowed.`;
+    }
+    return null;
+  }
+
+  /**
+   * Validates skill level field
+   */
+  private static validateSkillLevel(skillLevel: number | undefined): string | null {
+    if (skillLevel === undefined) {
+      return 'Skill level is required';
+    }
+    if (skillLevel < 1.0 || skillLevel > 5.5) {
+      return 'Skill level must be between 1.0 and 5.5';
+    }
+    if (skillLevel % 0.5 !== 0) {
+      return 'Skill level must be in increments of 0.5 (e.g., 1.0, 1.5, 2.0, etc.)';
+    }
+    return null;
+  }
+
+  /**
+   * Validates ZIP code field
+   */
+  private static validateZipCode(zipCode: string | undefined): string | null {
+    if (!zipCode) {
+      return 'ZIP code is required';
+    }
+    if (!this.validateZipCodeFormat(zipCode)) {
+      return 'Please enter a valid ZIP code';
+    }
+    return null;
+  }
+
+  /**
    * Validates complete registration form data
    */
   public static async validateRegistrationData(formData: RegistrationFormData): Promise<ValidationResult> {
     const errors: ValidationErrors = {};
 
-    // Full name validation
-    if (!formData.fullName?.trim()) {
-      errors.fullName = 'Full name is required';
-    } else if (formData.fullName.trim().length < 2) {
-      errors.fullName = 'Full name must be at least 2 characters';
-    }
+    // Validate each field using individual validation functions
+    const fullNameError = this.validateFullName(formData.fullName);
+    if (fullNameError) errors.fullName = fullNameError;
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!emailRegex.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
+    const emailError = this.validateEmail(formData.email);
+    if (emailError) errors.email = emailError;
 
-    // Confirm email validation
-    if (!formData.confirmEmail) {
-      errors.confirmEmail = 'Please confirm your email';
-    } else if (formData.email !== formData.confirmEmail) {
-      errors.confirmEmail = 'Email addresses do not match';
-    }
+    const confirmEmailError = this.validateConfirmEmail(formData.confirmEmail, formData.email);
+    if (confirmEmailError) errors.confirmEmail = confirmEmailError;
 
-    // Password validation
-    if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
+    const passwordError = this.validatePassword(formData.password);
+    if (passwordError) errors.password = passwordError;
 
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
+    const confirmPasswordError = this.validateConfirmPassword(formData.confirmPassword, formData.password);
+    if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
 
-    // Display name validation
-    if (!formData.displayName) {
-      errors.displayName = 'Display name is required';
-    }
+    const displayNameError = this.validateDisplayName(formData.displayName);
+    if (displayNameError) errors.displayName = displayNameError;
 
-    // Sports interested validation
-    if (!formData.preferredSports || formData.preferredSports.length === 0) {
-      errors.preferredSports = 'Please select at least one sport';
-    } else {
-      // Validate that only valid sports are selected
-      const validSports = ['tennis', 'pickleball'];
-      const invalidSports = formData.preferredSports.filter(sport => !validSports.includes(sport.toLowerCase()));
-      if (invalidSports.length > 0) {
-        errors.preferredSports = `Invalid sports selected: ${invalidSports.join(', ')}. Only tennis and pickleball are allowed.`;
-      }
-    }
+    const preferredSportsError = this.validatePreferredSports(formData.preferredSports);
+    if (preferredSportsError) errors.preferredSports = preferredSportsError;
 
-    // Skill level validation
-    if (formData.skillLevel < 1.0 || formData.skillLevel > 5.5) {
-      errors.skillLevel = 'Skill level must be between 1.0 and 5.5';
-    } else if (formData.skillLevel % 0.5 !== 0) {
-      errors.skillLevel = 'Skill level must be in increments of 0.5 (e.g., 1.0, 1.5, 2.0, etc.)';
-    }
+    const skillLevelError = this.validateSkillLevel(formData.skillLevel);
+    if (skillLevelError) errors.skillLevel = skillLevelError;
 
-    // ZIP code validation
-    if (!formData.zipCode) {
-      errors.zipCode = 'ZIP code is required';
-    } else if (!this.validateZipCodeFormat(formData.zipCode)) {
-      errors.zipCode = 'Please enter a valid ZIP code';
-    }
-
-    // If there are validation errors, return early
-    if (Object.keys(errors).length > 0) {
-      return {
-        isValid: false,
-        errors
-      };
-    }
-
-    // If ZIP code is valid, try to get city information
+    const zipCodeError = this.validateZipCode(formData.zipCode);
     let cityInfo: CityInfo | null = null;
-    if (formData.zipCode && this.validateZipCodeFormat(formData.zipCode)) {
+    if (zipCodeError) {
+      errors.zipCode = zipCodeError;
+    } else {
       cityInfo = await this.getCityFromZipCode(formData.zipCode);
     }
 
     return {
-      isValid: true,
-      errors: {},
+      isValid: Object.keys(errors).length === 0,
+      errors,
       cityInfo: cityInfo || undefined
     };
+  }
+
+  /**
+   * Validates update user data
+   */
+  public static async validateUpdateUserData(formData: UpdateUserInput): Promise<ValidationResult> {
+    const errors: ValidationErrors = {};
+    let cityInfo: CityInfo | null = null;
+
+    if (formData.name) {
+      const fullNameError = this.validateFullName(formData.name);
+      if (fullNameError) errors.fullName = fullNameError;
+    }
+
+    if (formData.display_name) {
+      const displayNameError = this.validateDisplayName(formData.display_name);
+      if (displayNameError) errors.displayName = displayNameError;
+    }
+
+    if (formData.skill_level) {
+      const skillLevelError = this.validateSkillLevel(formData.skill_level);
+      if (skillLevelError) errors.skillLevel = skillLevelError;
+    }
+
+    if (formData.preferred_sport) {
+      const preferredSportsError = this.validatePreferredSports([formData.preferred_sport as string]);
+      if (preferredSportsError) errors.preferredSports = preferredSportsError;
+    }
+
+    if (formData.zip_code) {
+      const zipCodeError = this.validateZipCode(formData.zip_code);
+      if (zipCodeError) errors.zipCode = zipCodeError;
+
+      if (!zipCodeError) {
+        cityInfo = await this.getCityFromZipCode(formData.zip_code);
+      }
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+      cityInfo: cityInfo || undefined
+    }
+
   }
 
   /**
