@@ -25,6 +25,21 @@ export interface Court {
 }
 
 /**
+ * Public court response type for API endpoints
+ * This type includes only the fields that should be visible to public users
+ */
+export interface PublicCourtResponse {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: SportOptions;
+}
+
+/**
  * Input type for creating a new court.
  * This type includes all required and optional fields needed to register a new court.
  */
