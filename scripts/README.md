@@ -31,7 +31,7 @@ npm run update-role -- --email user@example.com --role admin
 
 #### Direct execution:
 ```bash
-node scripts/createAdmin.js --email user@example.com --role admin
+node scripts/changeRoleScript.js --email user@example.com --role admin
 ```
 
 ### Parameters

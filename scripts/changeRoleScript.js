@@ -7,8 +7,8 @@
  * It changes the role of an existing user to admin or superadmin privileges.
  * 
  * Usage:
- *   node scripts/createAdmin.js --email user@example.com --role admin
- *   node scripts/createAdmin.js --email user@example.com --role superadmin
+ *   node scripts/changeRoleScript.js --email user@example.com --role admin
+ *   node scripts/changeRoleScript.js --email user@example.com --role superadmin
  * 
  * Security Note: This script should only be run by authorized personnel in secure environments.
  */
@@ -105,7 +105,7 @@ async function main() {
     if (validationErrors.length > 0) {
       console.error('❌ Validation errors:');
       validationErrors.forEach(error => console.error(`  - ${error}`));
-      console.error('\nUsage: node scripts/createAdmin.js --email user@example.com --role admin');
+      console.error('\nUsage: node scripts/changeRoleScript.js --email user@example.com --role admin');
       process.exit(1);
     }
 
@@ -170,7 +170,7 @@ async function main() {
     }
     
     process.exit(1);
-  }
+    }
 }
 
 // Run the script
