@@ -69,20 +69,6 @@ export interface CourtsRequestInput {
 }
 
 /**
- * Court validation input interface
- */
-export interface CourtValidationInput {
-  name: string;
-  address_line: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  is_indoor: boolean;
-  lights?: boolean;
-  sport: string;
-}
-
-/**
  * Court validation result interface
  */
 export interface CourtValidationResult {
