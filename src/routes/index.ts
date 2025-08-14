@@ -3,6 +3,7 @@ import healthRoutes from './healthRoutes';
 import usersRoutes from './usersRoutes';
 import authRoutes from './authRoutes';
 import matchesRoutes from './matchesRoutes';
+import publicUserRoutes from './publicUserRoutes';
 
 const router = Router();
 
@@ -23,5 +24,9 @@ router.use('/users', usersRoutes);
 
 // Matches routes
 router.use('/matches', matchesRoutes);
+
+// Public routes
+// Players routes
+router.use('/public/players', publicUserRoutes);
 
 export default router;
