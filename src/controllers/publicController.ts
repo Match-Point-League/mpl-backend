@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import { ApiResponse } from '../types';
-import { SportOptions } from '../types/userTypes';
+import { ApiResponse, SportOptions } from '../types';
 import database from '../config/database';
 import { Pool } from 'pg';
 

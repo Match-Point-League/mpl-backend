@@ -53,7 +53,7 @@ export class CourtsController {
       }
 
       // Prepare court data for database insertion with defaults
-      const insertData = {
+      const insertData : CreateCourtInput = {
         name: courtData.name,
         address_line: courtData.address_line,
         city: courtData.city,
