@@ -9,7 +9,7 @@ export class AuthController {
    * 
    * This endpoint:
    * 1. Accepts registration form data
-   * 2. Validates data using RegistrationValidationService
+   * 2. Validates data using ValidationService
    * 3. Creates user using AuthService
    * 4. Returns success/error response with field-specific errors
    */
