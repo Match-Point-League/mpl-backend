@@ -48,30 +48,45 @@ export class CourtValidationService {
     const errors: any = {};
     const warnings: string[] = [];
 
-    // Basic validations (synchronous)
-    const basicValidations = [
-      { field: 'name', test: validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH), error: 'Name must be 2-255 characters' },
-      { field: 'address_line', test: validateStringLength(courtData.address_line, VALIDATION_RULES.MIN_ADDRESS_LENGTH, VALIDATION_RULES.MAX_ADDRESS_LENGTH), error: 'Address must be 2-255 characters' },
-      { field: 'city', test: validateStringLength(courtData.city, 2, 100), error: 'City must be 2-100 characters' },
-      { field: 'state', test: validateStringLength(courtData.state, 2, 2), error: 'State must be 2 characters' },
-      { field: 'zip_code', test: validateStringLength(courtData.zip_code, 5, 10), error: 'ZIP code must be 5-10 characters' },
-      
-      // Format validations
-      { field: 'address_line', test: validateAddressFormat(courtData.address_line), error: 'Invalid address format' },
-      { field: 'city', test: validateCityFormat(courtData.city), error: 'Invalid city format' },
-      { field: 'state', test: validateState(courtData.state), error: 'Invalid state format' },
-      { field: 'zip_code', test: validateZipCodeFormat(courtData.zip_code), error: 'Invalid ZIP code format' },
-      
-      // Other validations
-      { field: 'is_indoor', test: courtData.is_indoor !== undefined, error: 'Indoor/outdoor status required' },
-      { field: 'sport', test: courtData.sport?.trim().length > 0, error: 'Sport is required' },
-      { field: 'lights', test: this.validateLightsField(courtData.is_indoor, courtData.lights), error: 'Invalid lights field' }
-    ];
+    const nameError = validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH) ? undefined : 'Name must be 2-255 characters';
+    if (nameError) errors.name = nameError;
 
-    // Run basic validations
-    basicValidations.forEach(({ field, test, error }) => {
-      if (!test) errors[field] = error;
-    });
+    const addressLineError = validateStringLength(courtData.address_line, VALIDATION_RULES.MIN_ADDRESS_LENGTH, VALIDATION_RULES.MAX_ADDRESS_LENGTH) ? undefined : 'Address must be 2-255 characters';
+    if (addressLineError) errors.address_line = addressLineError;
+
+    const cityError = validateStringLength(courtData.city, 2, 100) ? undefined : 'City must be 2-100 characters';
+    if (cityError) errors.city = cityError;
+
+    const stateError = validateStringLength(courtData.state, 2, 2) ? undefined : 'State must be 2 characters';
+    if (stateError) errors.state = stateError;
+
+    const zipCodeError = validateStringLength(courtData.zip_code, 5, 10) ? undefined : 'ZIP code must be 5-10 characters';
+    if (zipCodeError) errors.zip_code = zipCodeError;
+
+    // Format validations
+    const addressFormatError = validateAddressFormat(courtData.address_line) ? undefined : 'Invalid address format';
+    if (addressFormatError) errors.address_line = addressFormatError;
+
+    const cityFormatError = validateCityFormat(courtData.city) ? undefined : 'Invalid city format';
+    if (cityFormatError) errors.city = cityFormatError;
+
+    const stateFormatError = validateState(courtData.state) ? undefined : 'Invalid state format';
+    if (stateFormatError) errors.state = stateFormatError;
+
+    const zipCodeFormatError = validateZipCodeFormat(courtData.zip_code) ? undefined : 'Invalid ZIP code format';
+    if (zipCodeFormatError) errors.zip_code = zipCodeFormatError;
+
+    // Other validations
+    if (courtData.is_indoor === undefined) {
+      errors.is_indoor = 'Indoor/outdoor status required';
+    }
+
+    if (!courtData.sport?.trim().length) {
+      errors.sport = 'Sport is required';
+    }
+
+    const lightsError = this.validateLightsField(courtData.is_indoor, courtData.lights);
+    if (lightsError) errors.lights = lightsError;
 
     // Advanced validations (asynchronous) - only if basic validations pass
     if (Object.keys(errors).length === 0) {
