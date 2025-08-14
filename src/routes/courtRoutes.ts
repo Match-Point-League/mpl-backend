@@ -10,8 +10,10 @@ const router = Router();
  * Authentication required
  */
 
+// Apply authentication middleware to all routes
+router.use(authenticateToken);
+
 // POST /api/v1/courts - Create new court
-// Authenticated endpoint
-router.post('/', authenticateToken, CourtsController.createCourt);
+router.post('/', CourtsController.createCourt);
 
 export default router;
