@@ -14,7 +14,7 @@ import {
   validateStateAgainstZipCode,
   VALIDATION_RULES
 } from '../utils/validation';
-import { CourtValidationInput, CourtValidationResult } from '../types/courtTypes';
+import { CourtsRequestInput, CourtValidationResult } from '../types/courtTypes';
 
 /**
  * Service for validating court creation data
@@ -44,7 +44,7 @@ export class CourtValidationService {
    * @param courtData - The court data to validate
    * @returns Validation result with errors and warnings
    */
-  public static async validateCourtData(courtData: CourtValidationInput): Promise<CourtValidationResult> {
+  public static async validateCourtData(courtData: CourtsRequestInput): Promise<CourtValidationResult> {
     const errors: any = {};
     const warnings: string[] = [];
 
