@@ -3,7 +3,6 @@
  */
 
 import { VALIDATION_RULES } from './constants';
-import { validateAddressFormat } from './stringValidation';
 
 /**
  * Validates ZIP code format (5 digits or 5+4 format)
@@ -93,6 +92,25 @@ export function validateCityFormat(city: string): boolean {
   }
 
   return VALIDATION_RULES.CITY_REGEX.test(trimmed);
+}
+
+/**
+ * Validates address format (basic validation)
+ * @param value - The address to validate
+ * @returns true if valid, false otherwise
+ */
+export function validateAddressFormat(value: string): boolean {
+  if (!value || typeof value !== 'string') {
+    return false;
+  }
+
+  const trimmed = value.trim();
+  
+  // Basic validation: should contain at least one letter and one number
+  const hasLetter = /[a-zA-Z]/.test(trimmed);
+  const hasNumber = /\d/.test(trimmed);
+  
+  return hasLetter && hasNumber && trimmed.length >= VALIDATION_RULES.MIN_ADDRESS_LENGTH;
 }
 
 /**
