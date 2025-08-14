@@ -5,8 +5,9 @@ import { authenticateToken } from '../middleware/authMiddleware';
 const router = Router();
 
 /**
- * Court routes
+ * Authenticated Court routes
  * Base path: /api/v1/courts
+ * Authentication required
  */
 
 // POST /api/v1/courts - Create new court

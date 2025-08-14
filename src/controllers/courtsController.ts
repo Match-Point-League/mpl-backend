@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { CourtValidationService } from '../services/courtValidationService';
@@ -92,7 +92,7 @@ export class CourtsController {
    * @param req - Request with court ID in params
    * @param res - Express response object
    */
-  public static async getCourtById(req: AuthenticatedRequest, res: Response): Promise<void> {
+  public static async getCourtById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.query;
 
@@ -129,7 +129,7 @@ export class CourtsController {
    * @param req - Request with verification status in params
    * @param res - Express response object
    */
-  public static async getCourtsByVerified(req: AuthenticatedRequest, res: Response): Promise<void> {
+  public static async getCourtsByVerified(req: Request, res: Response): Promise<void> {
     try {
       const { verified } = req.query;
 
