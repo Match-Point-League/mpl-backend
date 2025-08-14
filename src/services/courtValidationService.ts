@@ -153,13 +153,22 @@ export class CourtValidationService {
       }
     }
 
-    // Handle lights field logic for partial updates
-    if (updateData.is_indoor !== undefined || updateData.lights !== undefined) {
-      const isIndoor = updateData.is_indoor !== undefined ? updateData.is_indoor : true; // Default for validation
-      const lights = updateData.lights;
-      
-      const lightsError = this.validateLightsField(isIndoor, lights);
-      if (lightsError) errors.lights = lightsError;
+    // Handle lights field logic for data integrity
+    if (updateData.is_indoor !== undefined) {
+      if (updateData.is_indoor === true) {
+        // Changing to indoor - lights not applicable, set to undefined
+        updateData.lights = undefined;
+        
+        // Add warning if user was trying to set lights
+        if (updateData.lights !== undefined) {
+          warnings.push('Lights field automatically set to undefined for indoor courts');
+        }
+      } else if (updateData.is_indoor === false && updateData.lights === undefined) {
+        // Changing to outdoor but no lights provided - set default to false
+        updateData.lights = false;
+        
+        warnings.push('Lights field automatically set to false (no lights) for outdoor courts');
+      }
     }
 
     // Advanced validations (asynchronous) - only if state and zip_code are both provided

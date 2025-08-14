@@ -170,17 +170,12 @@ export class CourtsController {
     // Validate the update data
     const validationResult = await CourtValidationService.validateCourtUpdateData(updateData);
     if (!validationResult.isValid) {
-      const response: ApiResponse = {
-        success: false,
-        error: 'Invalid update data',
-        data: {
-          validationErrors: validationResult.errors,
-        },
-        timestamp: new Date().toISOString(),
-      };
-      res.status(400).json(response);
+      res.status(400).json(ResponseService.createErrorResponse('Invalid update data', 400, { validationErrors: validationResult.errors }));
       return;
     }
+
+    // Collect warnings from validation service
+    const warnings = [...validationResult.warnings];
 
     try {
       // Prepare the update fields and values
@@ -197,12 +192,7 @@ export class CourtsController {
 
       // Validate that there are fields to update
       if (updateFields.length === 0) {
-        const response: ApiResponse = {
-          success: false,
-          error: 'No valid fields to update',
-          timestamp: new Date().toISOString(),
-        };
-        res.status(400).json(response);
+        res.status(400).json(ResponseService.createErrorResponse('No valid fields to update', 400));
         return;
       }
 
@@ -221,31 +211,21 @@ export class CourtsController {
 
       // Check if the court was updated successfully
       if (result.rows.length === 0) {
-        const response: ApiResponse = {
-          success: false,
-          error: 'Court not found',
-          timestamp: new Date().toISOString(),
-        };
-        res.status(404).json(response);
+        res.status(404).json(ResponseService.createErrorResponse('Court not found', 404));
         return;
       }
 
       // Return the updated court
-      const response: ApiResponse = {
-        success: true,
-        data: result.rows[0],
-        message: 'Court updated successfully',
-        timestamp: new Date().toISOString(),
+      const responseData = {
+        court: result.rows[0],
+        warnings: warnings.length > 0 ? warnings : undefined
       };
-      res.json(response);
+      
+      res.status(200).json(ResponseService.createSuccessResponse(responseData, 'Court updated successfully'));
+
     } catch (error) {
       console.error('Update court error:', error);
-      const response: ApiResponse = {
-        success: false,
-        error: 'Failed to update court',
-        timestamp: new Date().toISOString(),
-      };
-      res.status(500).json(response);
+      res.status(500).json(ResponseService.createErrorResponse('Failed to update court', 500));
     }
   }
 }
