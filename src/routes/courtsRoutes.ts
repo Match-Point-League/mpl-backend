@@ -10,7 +10,7 @@ const router = Router();
  */
 
 // POST /api/v1/courts - Create new court
-// Requires authentication-- must be created by a user
+// Authenticated endpoint
 router.post('/', authenticateToken, CourtsController.createCourt);
 
 // GET /api/v1/courts/verified?verified=true - Get courts by verification status

@@ -53,7 +53,7 @@ export class CourtsController {
       }
 
       // Prepare court data for database insertion with defaults
-      const insertData = {
+      const insertData : CreateCourtInput = {
         name: courtData.name,
         address_line: courtData.address_line,
         city: courtData.city,
@@ -67,14 +67,14 @@ export class CourtsController {
       };
 
       // Insert court data into the database
-      const fieldOrder = ['name', 'address_line', 'city', 'state', 'zip_code', 'is_indoor', 'lights', 'sport', 'verified', 'created_by'];
-      const values = fieldOrder.map(field => insertData[field as keyof typeof insertData]);
+      const fieldNames = Object.keys(insertData);
+      const values = Object.values(insertData);
 
       // Log court insertion for debugging (remove in production)
-      console.log('Inserting court data:', { fieldOrder, values, insertData });
+      console.log('Inserting court data:', { fieldNames, values, insertData });
 
       const result = await CourtsController.db.query(
-        `INSERT INTO courts (${fieldOrder.join(', ')}) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+        `INSERT INTO courts (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
         values
       );
 

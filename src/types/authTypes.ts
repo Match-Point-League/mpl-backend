@@ -2,6 +2,8 @@
  * Authentication-related types for the backend
  */
 
+import { UserRole } from './userTypes';
+
 // SignUpRequest and SignUpResponse moved to registrationTypes.ts
 
 export interface SignInRequest {
