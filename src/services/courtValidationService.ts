@@ -12,7 +12,6 @@ import {
   validateZipCodeFormat,
   validateState,
   validateStateAgainstZipCode,
-  validateLightsField,
   VALIDATION_RULES
 } from '../utils/validation';
 import { CourtValidationInput, CourtValidationResult } from '../types/courtTypes';
@@ -21,6 +20,24 @@ import { CourtValidationInput, CourtValidationResult } from '../types/courtTypes
  * Service for validating court creation data
  */
 export class CourtValidationService {
+
+  /**
+   * Validates the lights field based on indoor/outdoor status
+   * @param isIndoor - Whether the court is indoor
+   * @param lights - The lights value to validate
+   * @returns Error message if validation fails, undefined if valid
+   */
+  private static validateLightsField(isIndoor: boolean, lights: boolean | undefined): string | undefined {
+    if (isIndoor && lights !== undefined) {
+      return 'Lights field is not applicable for indoor courts';
+    }
+    
+    if (!isIndoor && (lights === undefined || lights === null)) {
+      return 'Lights field is required for outdoor courts';
+    }
+    
+    return undefined; // Validation passed
+  }
 
   /**
    * Validates court creation input data
@@ -48,7 +65,7 @@ export class CourtValidationService {
       // Other validations
       { field: 'is_indoor', test: courtData.is_indoor !== undefined, error: 'Indoor/outdoor status required' },
       { field: 'sport', test: courtData.sport?.trim().length > 0, error: 'Sport is required' },
-      { field: 'lights', test: validateLightsField(courtData.is_indoor, courtData.lights), error: 'Invalid lights field' }
+      { field: 'lights', test: this.validateLightsField(courtData.is_indoor, courtData.lights), error: 'Invalid lights field' }
     ];
 
     // Run basic validations
