@@ -6,7 +6,7 @@ import { ResponseService } from '../services/responseService';
 import database from '../config/database';
 import { Pool } from 'pg';
 
-export class CourtsController {
+export class CourtController {
 
   private static db: Pool = database.getPool();
 
@@ -73,7 +73,7 @@ export class CourtsController {
       // Log court insertion for debugging (remove in production)
       console.log('Inserting court data:', { fieldNames, values, insertData });
 
-      const result = await CourtsController.db.query(
+      const result = await CourtController.db.query(
         `INSERT INTO courts (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
         values
       );

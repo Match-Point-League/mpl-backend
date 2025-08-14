@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { CourtsController } from '../controllers';
+import { CourtController } from '../controllers';
 import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -14,6 +14,6 @@ const router = Router();
 router.use(authenticateToken);
 
 // POST /api/v1/courts - Create new court
-router.post('/', CourtsController.createCourt);
+router.post('/', CourtController.createCourt);
 
 export default router;

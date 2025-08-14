@@ -1,4 +1,4 @@
 export { HealthController } from './healthController';
 export { UsersController } from './usersController';
 export { AuthController } from './authController';
-export { CourtsController } from './courtsController';
+export { CourtController } from './courtController';
