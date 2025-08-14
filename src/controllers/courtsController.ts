@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse } from '../types';
+import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse, UpdateCourtInput } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
@@ -154,6 +154,97 @@ export class CourtsController {
     } catch (error) {
       console.error('Error retrieving courts by verification status:', error);
       const response = ResponseService.createErrorResponse('Failed to retrieve courts', 500);
+      res.status(500).json(response);
+    }
+  }
+
+  /**
+   * Updates an existing court
+   * @param req - The authenticated request object with court update data
+   * @param res - The response object
+   * @returns void
+   */
+  public static async updateCourt(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const updateData: UpdateCourtInput = req.body;
+
+    // Validate the update data
+    const validationResult = await CourtValidationService.validateCourtUpdateData(updateData);
+    if (!validationResult.isValid) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Invalid update data',
+        data: {
+          validationErrors: validationResult.errors,
+        },
+        timestamp: new Date().toISOString(),
+      };
+      res.status(400).json(response);
+      return;
+    }
+
+    try {
+      // Prepare the update fields and values
+      const updateFields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      for (const [field, value] of Object.entries(updateData)) {
+        if (value !== undefined) {
+          updateFields.push(`${field} = $${paramIndex++}`);
+          values.push(value);
+        }
+      }
+
+      // Validate that there are fields to update
+      if (updateFields.length === 0) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'No valid fields to update',
+          timestamp: new Date().toISOString(),
+        };
+        res.status(400).json(response);
+        return;
+      }
+
+      // Get court ID from request parameters
+      values.push(req.params.id);
+
+      // Update the court
+      const query = `
+        UPDATE courts 
+        SET ${updateFields.join(', ')} 
+        WHERE id = $${paramIndex}
+        RETURNING id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified, created_by, created_at, updated_at
+      `;
+
+      const result = await CourtsController.db.query(query, values);
+
+      // Check if the court was updated successfully
+      if (result.rows.length === 0) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Court not found',
+          timestamp: new Date().toISOString(),
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Return the updated court
+      const response: ApiResponse = {
+        success: true,
+        data: result.rows[0],
+        message: 'Court updated successfully',
+        timestamp: new Date().toISOString(),
+      };
+      res.json(response);
+    } catch (error) {
+      console.error('Update court error:', error);
+      const response: ApiResponse = {
+        success: false,
+        error: 'Failed to update court',
+        timestamp: new Date().toISOString(),
+      };
       res.status(500).json(response);
     }
   }
