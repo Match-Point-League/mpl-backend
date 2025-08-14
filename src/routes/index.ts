@@ -24,7 +24,7 @@ router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
 
 // Courts routes (authenticated)
-router.use('/public/courts', authenticatedCourtsRoutes);
+router.use('/courts', authenticatedCourtsRoutes);
 
 // Public routes
 // Players routes
