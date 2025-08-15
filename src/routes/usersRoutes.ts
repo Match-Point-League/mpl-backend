@@ -19,4 +19,7 @@ router.get('/get-user', UsersController.getUser);
 // PUT /api/v1/users/update-user
 router.put('/update-user', UsersController.updateUser);
 
+// DELETE /api/v1/users/delete-user
+router.delete('/delete-user', UsersController.deleteUser);
+
 export default router;
