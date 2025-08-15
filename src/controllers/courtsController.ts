@@ -196,19 +196,18 @@ export class CourtsController {
         UPDATE courts 
         SET ${updateFields.join(', ')} 
         WHERE id = $${paramIndex}
-        RETURNING id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified
       `;
 
       const result = await CourtsController.db.query(query, values);
 
-      // Check if the court was updated successfully
-      if (result.rows.length === 0) {
+      // Check if the court was updated successfully using rowCount
+      if (result.rowCount === 0) {
         res.status(404).json(ResponseService.createErrorResponse('Court not found', 404));
         return;
       }
 
-      // Return the transformed court data
-      res.status(200).json(ResponseService.createSuccessResponse(result.rows[0] as PublicCourtResponse, 'Court updated successfully'));
+      // Return success confirmation
+      res.status(200).json(ResponseService.createSuccessResponse({ message: 'Court updated successfully' }, 'Court updated successfully'));
 
     } catch (error) {
       console.error('Update court error:', error);
