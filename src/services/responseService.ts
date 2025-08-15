@@ -8,41 +8,6 @@ import { ApiResponse } from '../types';
 
 export class ResponseService {
   /**
-   * Creates a standardized success response
-   * @param data - The data to include in the response
-   * @param message - Optional success message
-   * @returns Formatted success response
-   */
-  public static createSuccessResponse<T>(data: T, message?: string): ApiResponse<T> {
-    return {
-      success: true,
-      message: message || 'Operation completed successfully',
-      data,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Creates a standardized error response
-   * @param error - The error message
-   * @param statusCode - Optional HTTP status code
-   * @param data - Optional additional data (like validation errors)
-   * @returns Formatted error response
-   */
-  public static createErrorResponse<T = any>(
-    error: string, 
-    statusCode?: number, 
-    data?: T
-  ): ApiResponse<T> {
-    return {
-      success: false,
-      error,
-      data,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
    * Handles database errors and returns appropriate error messages
    * @param error - The database error object
    * @param res - Express response object
@@ -78,8 +43,10 @@ export class ResponseService {
       }
     }
 
-    res.status(statusCode).json(
-      ResponseService.createErrorResponse(errorMessage, statusCode)
-    );
+    res.status(statusCode).json({
+      success: false,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
   }
 }
