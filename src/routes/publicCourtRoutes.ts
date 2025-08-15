@@ -13,6 +13,6 @@ const router = Router();
 router.get('/verified', CourtsController.getOnlyVerifiedCourts);
 
 // GET /api/v1/public/courts/:id - Get verified court by ID
-router.get('/:id', CourtsController.getVerifiedCourtById);
+router.get('/:id', CourtsController.getVerifiedCourt);
 
 export default router;

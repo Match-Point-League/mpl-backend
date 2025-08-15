@@ -183,7 +183,7 @@ export class CourtsController {
    * @param req - Request with court ID in params
    * @param res - Express response object
    */
-  public static async getVerifiedCourtById(req: Request, res: Response): Promise<void> {
+  public static async getVerifiedCourt(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
