@@ -10,7 +10,7 @@ const router = Router();
  */
 
 // GET /api/v1/public/courts/verified - Get all verified courts
-router.get('/verified', CourtsController.getOnlyVerifiedCourts);
+router.get('/verified', CourtsController.getVerifiedCourts);
 
 // GET /api/v1/public/courts/:id - Get verified court by ID
 router.get('/:id', CourtsController.getVerifiedCourt);
