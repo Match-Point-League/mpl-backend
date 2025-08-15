@@ -34,16 +34,6 @@ export function validateStringLength(
 }
 
 /**
- * Validates if a string is not empty and has minimum length
- * @param value - The string to validate
- * @param minLength - Minimum required length (defaults to 1)
- * @returns true if valid, false otherwise
- */
-export function validateRequiredString(value: string, minLength: number = 1): boolean {
-  return validateStringLength(value, minLength);
-}
-
-/**
  * Validates name format (letters, spaces, hyphens, apostrophes)
  * @param value - The name to validate
  * @returns true if valid, false otherwise

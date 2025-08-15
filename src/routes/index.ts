@@ -3,8 +3,7 @@ import healthRoutes from './healthRoutes';
 import usersRoutes from './usersRoutes';
 import authRoutes from './authRoutes';
 import publicUserRoutes from './publicUserRoutes';
-import publicCourtsRoutes from './publicCourtRoutes';
-import authenticatedCourtsRoutes from './authenticatedCourtRoutes';
+import courtRoutes from './courtRoutes';
 
 const router = Router();
 
@@ -24,13 +23,10 @@ router.use('/auth', authRoutes);
 router.use('/users', usersRoutes);
 
 // Courts routes (authenticated)
-router.use('/courts', authenticatedCourtsRoutes);
+router.use('/courts', courtRoutes);
 
 // Public routes
 // Players routes
 router.use('/public/players', publicUserRoutes);
-
-// Courts routes
-router.use('/public/courts', publicCourtsRoutes);
 
 export default router;
