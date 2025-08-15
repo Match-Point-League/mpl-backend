@@ -159,6 +159,28 @@ export class CourtsController {
   }
 
   /**
+   * Retrieves all courts (Admin only)
+   * @param req - The authenticated request object
+   * @param res - Express response object
+   */
+  public static async getAllCourts(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Query the database for all courts
+      const result = await CourtsController.db.query(
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified, created_by FROM courts ORDER BY created_at DESC'
+      );
+
+      // Return the courts array
+      res.status(200).json(ResponseService.createSuccessResponse(result.rows, 'All courts retrieved successfully'));
+
+    } catch (error) {
+      console.error('Error retrieving all courts:', error);
+      const response = ResponseService.createErrorResponse('Failed to retrieve courts', 500);
+      res.status(500).json(response);
+    }
+  }
+
+  /**
    * Updates an existing court
    * @param req - The authenticated request object with court update data
    * @param res - The response object
