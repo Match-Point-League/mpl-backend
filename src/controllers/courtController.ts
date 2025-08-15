@@ -1,0 +1,126 @@
+import { Response, Request } from 'express';
+import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse, PublicCourtResponse } from '../types';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
+import { CourtValidationService } from '../services/courtValidationService';
+import { ResponseService } from '../services/responseService';
+import database from '../config/database';
+import { Pool } from 'pg';
+
+export class CourtController {
+
+  private static db: Pool = database.getPool();
+
+
+
+  /**
+   * Main method to create a new court
+   * @param req - Authenticated request with court data
+   * @param res - Express response object
+   */
+  public static async createCourt(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Authentication check
+      if (!req.user?.uid) {
+        res.status(401).json({
+          success: false,
+          error: 'User authentication required',
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Extract court data from request body
+      const courtData: CourtsRequestInput = req.body;
+      const { name, address_line, city, state, zip_code, is_indoor, lights, sport } = courtData;
+
+      // Validate court data using our comprehensive validation service
+      const validationResult = await CourtValidationService.validateCourtData({
+        name,
+        address_line,
+        city,
+        state,
+        zip_code,
+        is_indoor,
+        lights,
+        sport
+      });
+
+      if (!validationResult.isValid) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          data: { validationErrors: validationResult.errors },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // Get PostgreSQL user ID from email
+      const userResult = await CourtController.db.query(
+        'SELECT id FROM users WHERE email = $1',
+        [req.user!.email]
+      );
+
+      if (userResult.rows.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: 'User not found in database',
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const id = userResult.rows[0].id;
+
+      // Prepare court data for database insertion with defaults
+      const insertData : CreateCourtInput = {
+        name: courtData.name,
+        address_line: courtData.address_line,
+        city: courtData.city,
+        state: courtData.state,
+        zip_code: courtData.zip_code,
+        is_indoor: courtData.is_indoor,
+        lights: courtData.is_indoor ? true : courtData.lights, // Set lights to true for indoor courts
+        sport: courtData.sport as SportOptions, 
+        verified: false, // Default to false
+        created_by: id,
+      };
+
+      // Insert court data into the database
+      const fieldNames = Object.keys(insertData);
+      const values = Object.values(insertData);
+
+      // Log court insertion for debugging (remove in production)
+      console.log('Inserting court data:', { fieldNames, values, insertData });
+
+      const result = await CourtController.db.query(
+        `INSERT INTO courts (${fieldNames.join(', ')}) VALUES (${fieldNames.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
+        values
+      );
+
+      // Return success response with the created court
+      const responseData: PublicCourtResponse = {
+        id: result.rows[0].id,
+        name: result.rows[0].name,
+        address_line: result.rows[0].address_line,
+        city: result.rows[0].city,
+        state: result.rows[0].state,
+        zip_code: result.rows[0].zip_code,
+        is_indoor: result.rows[0].is_indoor,
+        lights: result.rows[0].lights,
+        sport: result.rows[0].sport
+      };
+
+      res.status(201).json({
+        success: true,
+        message: 'Court created successfully',
+        data: responseData,
+        timestamp: new Date().toISOString(),
+      });
+
+    } catch (error) {
+      console.error('Error creating court:', error);
+      ResponseService.handleDatabaseError(error, res);
+    }
+  }
+}

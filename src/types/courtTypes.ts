@@ -16,7 +16,7 @@ export interface Court {
   state: string;
   zip_code: string;
   is_indoor: boolean;
-  lights?: boolean; // Only applies to outdoor courts; null if indoor
+  lights?: boolean; 
   sport: SportOptions;
   verified: boolean;
   created_by: string;
@@ -55,4 +55,44 @@ export interface UpdateCourtInput {
   lights?: boolean;
   sport?: SportOptions;
   verified?: boolean;
+}
+
+export interface CourtsRequestInput {
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: string;
+}
+
+/**
+ * Court validation result interface
+ */
+export interface CourtValidationResult {
+  isValid: boolean;
+  errors: {
+    name?: string;
+    address_line?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    is_indoor?: string;
+    lights?: string;
+    sport?: string;
+  };
+}
+
+export interface PublicCourtResponse {
+  id: string;
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: SportOptions;
 }

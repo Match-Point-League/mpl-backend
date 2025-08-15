@@ -3,6 +3,7 @@ import healthRoutes from './healthRoutes';
 import usersRoutes from './usersRoutes';
 import authRoutes from './authRoutes';
 import publicUserRoutes from './publicUserRoutes';
+import courtRoutes from './courtRoutes';
 
 const router = Router();
 
@@ -20,6 +21,9 @@ router.use('/auth', authRoutes);
 
 // Users routes
 router.use('/users', usersRoutes);
+
+// Courts routes (authenticated)
+router.use('/courts', courtRoutes);
 
 // Public routes
 // Players routes
