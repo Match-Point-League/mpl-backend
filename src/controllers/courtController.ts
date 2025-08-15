@@ -5,6 +5,7 @@ import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { fetchCourtsByVerifiedStatus } from '../utils/courtUtils';
 
 export class CourtsController {
 
@@ -21,7 +22,11 @@ export class CourtsController {
     try {
       // Authentication check
       if (!req.user?.uid) {
-        res.status(401).json(ResponseService.createErrorResponse('User authentication required', 401));
+        res.status(401).json({
+        success: false,
+        error: 'User authentication required',
+        timestamp: new Date().toISOString()
+      });
         return;
       }
 
@@ -42,7 +47,12 @@ export class CourtsController {
       });
 
       if (!validationResult.isValid) {
-        res.status(400).json(ResponseService.createErrorResponse('Validation failed', 400, { validationErrors: validationResult.errors }));
+        res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          data: { validationErrors: validationResult.errors },
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
@@ -79,7 +89,12 @@ export class CourtsController {
       );
 
       // Return success response with the created court
-      res.status(201).json(ResponseService.createSuccessResponse(result.rows[0], 'Court created successfully'));
+      res.status(201).json({
+        success: true,
+        message: 'Court created successfully',
+        data: result.rows[0],
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       console.error('Error creating court:', error);
@@ -98,7 +113,11 @@ export class CourtsController {
 
       // Validate that ID parameter exists
       if (!id) {
-        res.status(400).json(ResponseService.createErrorResponse('Court ID is required', 400));
+        res.status(400).json({
+          success: false,
+          error: 'Court ID is required',
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
@@ -110,22 +129,35 @@ export class CourtsController {
 
       // Check if court was found
       if (result.rows.length === 0) {
-        res.status(404).json(ResponseService.createErrorResponse('Court not found', 404));
+        res.status(404).json({
+          success: false,
+          error: 'Court not found',
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
       // Return the court data (already in PublicCourtResponse format)
-      res.status(200).json(ResponseService.createSuccessResponse(result.rows[0], 'Court retrieved successfully'));
+      res.status(200).json({
+        success: true,
+        message: 'Court retrieved successfully',
+        data: result.rows[0],
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       console.error('Error retrieving court:', error);
-      const response = ResponseService.createErrorResponse('Failed to retrieve court', 500);
-      res.status(500).json(response);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve court',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
   /**
    * Retrieves all courts by verification status
+   * admin endpoint
    * @param req - Request with verification status in params
    * @param res - Express response object
    */
@@ -135,26 +167,118 @@ export class CourtsController {
 
       // Validate that verified parameter exists
       if (!verified) {
-        res.status(400).json(ResponseService.createErrorResponse('Verification status is required', 400));
+        res.status(400).json({
+          success: false,
+          error: 'Verification status is required',
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
       // Convert string parameter to boolean
       const isVerified = verified === 'true';
 
-      // Query the database for courts matching verification status
-      const result = await CourtsController.db.query(
-        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = $1',
-        [isVerified]
-      );
+      // Use utility function to fetch courts with creator information (admin endpoint)
+      const courts = await fetchCourtsByVerifiedStatus(isVerified, true);
 
-      // Return the courts array (already in PublicCourtResponse format)
-      res.status(200).json(ResponseService.createSuccessResponse(result.rows, 'Courts retrieved successfully'));
+      // Return the courts array
+      res.status(200).json({
+        success: true,
+        message: 'Courts retrieved successfully',
+        data: courts,
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       console.error('Error retrieving courts by verification status:', error);
-      const response = ResponseService.createErrorResponse('Failed to retrieve courts', 500);
-      res.status(500).json(response);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve courts',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Retrieves all verified courts only
+   * public endpoint
+   * @param req - Request object
+   * @param res - Express response object
+   */
+  public static async getVerifiedCourts(req: Request, res: Response): Promise<void> {
+    try {
+      // Use utility function to fetch verified courts without creator information (public endpoint)
+      const courts = await fetchCourtsByVerifiedStatus(true, false);
+
+      // Return the courts array
+      res.status(200).json({
+        success: true,
+        message: 'Verified courts retrieved successfully',
+        data: courts,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error retrieving verified courts:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve verified courts',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Retrieves a specific verified court by ID
+   * public endpoint
+   * @param req - Request with court ID in params
+   * @param res - Express response object
+   */
+  public static async getVerifiedCourt(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      // Validate that ID parameter exists
+      if (!id) {
+        res.status(400).json({
+          success: false,
+          error: 'Court ID is required',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Query the database for the verified court
+      const result = await CourtsController.db.query(
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE id = $1 AND verified = true',
+        [id]
+      );
+
+      // Check if verified court was found
+      if (result.rows.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: 'Verified court not found',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Return the verified court data
+      res.status(200).json({
+        success: true,
+        message: 'Verified court retrieved successfully',
+        data: result.rows[0],
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error retrieving verified court:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to retrieve verified court',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
@@ -170,7 +294,12 @@ export class CourtsController {
     // Validate the update data
     const validationResult = await CourtValidationService.validateCourtUpdateData(updateData);
     if (!validationResult.isValid) {
-      res.status(400).json(ResponseService.createErrorResponse('Invalid update data', 400, { validationErrors: validationResult.errors }));
+      res.status(400).json({
+        success: false,
+        error: 'Invalid update data',
+        data: { validationErrors: validationResult.errors },
+        timestamp: new Date().toISOString()
+      });
       return;
     }
 
@@ -192,7 +321,11 @@ export class CourtsController {
 
       // Validate that there are fields to update
       if (updateFields.length === 0) {
-        res.status(400).json(ResponseService.createErrorResponse('No valid fields to update', 400));
+        res.status(400).json({
+          success: false,
+          error: 'No valid fields to update',
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
@@ -211,7 +344,11 @@ export class CourtsController {
 
       // Check if the court was updated successfully
       if (result.rows.length === 0) {
-        res.status(404).json(ResponseService.createErrorResponse('Court not found', 404));
+        res.status(404).json({
+          success: false,
+          error: 'Court not found',
+          timestamp: new Date().toISOString()
+        });
         return;
       }
 
@@ -221,11 +358,20 @@ export class CourtsController {
         warnings: warnings.length > 0 ? warnings : undefined
       };
       
-      res.status(200).json(ResponseService.createSuccessResponse(responseData, 'Court updated successfully'));
+      res.status(200).json({
+        success: true,
+        message: 'Court updated successfully',
+        data: responseData,
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       console.error('Update court error:', error);
-      res.status(500).json(ResponseService.createErrorResponse('Failed to update court', 500));
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update court',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 }
