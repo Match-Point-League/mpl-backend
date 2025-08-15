@@ -99,5 +99,4 @@ export interface CourtValidationResult {
     lights?: string;
     sport?: string;
   };
-  warnings: string[];
 }

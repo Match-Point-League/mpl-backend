@@ -67,8 +67,7 @@ export class AuthService {
           return {
             success: true,
             message: 'User created successfully',
-            userId: firebaseUser.uid,
-            warning: 'Some profile information may be incomplete'
+            userId: firebaseUser.uid
           };
         }
         

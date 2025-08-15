@@ -42,11 +42,10 @@ export class CourtValidationService {
   /**
    * Validates court creation input data
    * @param courtData - The court data to validate
-   * @returns Validation result with errors and warnings
+   * @returns Validation result with errors
    */
   public static async validateCourtData(courtData: CourtsRequestInput): Promise<CourtValidationResult> {
     const errors: any = {};
-    const warnings: string[] = [];
 
     const nameError = validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH) ? undefined : 'Name must be 2-255 characters';
     if (nameError) errors.name = nameError;
@@ -97,17 +96,16 @@ export class CourtValidationService {
       }
     }
 
-    return { isValid: Object.keys(errors).length === 0, errors, warnings };
+    return { isValid: Object.keys(errors).length === 0, errors };
   }
 
   /**
    * Validates court update data (partial updates)
    * @param updateData - The court update data to validate
-   * @returns Validation result with errors and warnings
+   * @returns Validation result with errors
    */
   public static async validateCourtUpdateData(updateData: UpdateCourtInput): Promise<CourtValidationResult> {
     const errors: any = {};
-    const warnings: string[] = [];
 
     // Only validate fields that are provided
     if (updateData.name) {
@@ -158,16 +156,9 @@ export class CourtValidationService {
       if (updateData.is_indoor === true) {
         // Changing to indoor - lights not applicable, set to undefined
         updateData.lights = undefined;
-        
-        // Add warning if user was trying to set lights
-        if (updateData.lights !== undefined) {
-          warnings.push('Lights field automatically set to undefined for indoor courts');
-        }
       } else if (updateData.is_indoor === false && updateData.lights === undefined) {
         // Changing to outdoor but no lights provided - set default to false
         updateData.lights = false;
-        
-        warnings.push('Lights field automatically set to false (no lights) for outdoor courts');
       }
     }
 
@@ -179,6 +170,6 @@ export class CourtValidationService {
       }
     }
 
-    return { isValid: Object.keys(errors).length === 0, errors, warnings };
+    return { isValid: Object.keys(errors).length === 0, errors };
   }
 }

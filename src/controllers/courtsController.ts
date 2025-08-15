@@ -1,10 +1,11 @@
 import { Response, Request } from 'express';
-import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse, UpdateCourtInput } from '../types';
+import { CourtsRequestInput, CreateCourtInput, SportOptions, UpdateCourtInput } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { PublicCourtResponse } from '../types';
 
 export class CourtsController {
 
@@ -44,12 +45,6 @@ export class CourtsController {
       if (!validationResult.isValid) {
         res.status(400).json(ResponseService.createErrorResponse('Validation failed', 400, { validationErrors: validationResult.errors }));
         return;
-      }
-
-      // Add any warnings to the response (for future use with external validation)
-      if (validationResult.warnings.length > 0) {
-        // Log validation warnings (remove in production)
-        console.log('Court validation warnings:', validationResult.warnings);
       }
 
       // Prepare court data for database insertion with defaults
@@ -174,9 +169,6 @@ export class CourtsController {
       return;
     }
 
-    // Collect warnings from validation service
-    const warnings = [...validationResult.warnings];
-
     try {
       // Prepare the update fields and values
       const updateFields: string[] = [];
@@ -204,7 +196,7 @@ export class CourtsController {
         UPDATE courts 
         SET ${updateFields.join(', ')} 
         WHERE id = $${paramIndex}
-        RETURNING id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified, created_by, created_at, updated_at
+        RETURNING id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified
       `;
 
       const result = await CourtsController.db.query(query, values);
@@ -215,13 +207,8 @@ export class CourtsController {
         return;
       }
 
-      // Return the updated court
-      const responseData = {
-        court: result.rows[0],
-        warnings: warnings.length > 0 ? warnings : undefined
-      };
-      
-      res.status(200).json(ResponseService.createSuccessResponse(responseData, 'Court updated successfully'));
+      // Return the transformed court data
+      res.status(200).json(ResponseService.createSuccessResponse(result.rows[0] as PublicCourtResponse, 'Court updated successfully'));
 
     } catch (error) {
       console.error('Update court error:', error);

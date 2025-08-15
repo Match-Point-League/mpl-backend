@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/authService';
-import { ApiResponse } from '../types';
+import { ApiResponse, UserRole } from '../types';
 import database from '../config/database';
 
 export interface AuthenticatedRequest extends Request {
@@ -93,7 +93,7 @@ export const requireAdminRole = async (
 
     // Check if the user has admin role
     const userRole = result.rows[0].role;
-    if (userRole !== 'admin') {
+    if (userRole !== UserRole.ADMIN) {
       const response: ApiResponse = {
         success: false,
         error: 'Access denied: Admin role required',
