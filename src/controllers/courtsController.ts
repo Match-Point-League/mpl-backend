@@ -104,7 +104,11 @@ export class CourtsController {
 
       // Query the database for the court
       const result = await CourtsController.db.query(
-        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport, created_by FROM courts WHERE id = $1',
+        `SELECT court.id, court.name, court.address_line, court.city, court.state, court.zip_code, court.is_indoor, court.lights, court.sport, court.verified, court.created_by,
+                user.name as creator_name, user.email as creator_email
+         FROM courts court
+         LEFT JOIN users user ON court.created_by = user.id
+         WHERE c.id = $1`,
         [id]
       );
 
@@ -144,7 +148,11 @@ export class CourtsController {
 
       // Query the database for courts matching verification status
       const result = await CourtsController.db.query(
-        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport, created_by FROM courts WHERE verified = $1',
+        `SELECT court.id, court.name, court.address_line, court.city, court.state, court.zip_code, court.is_indoor, court.lights, court.sport, court.created_by,
+                user.name as creator_name, user.email as creator_email
+         FROM courts court
+         LEFT JOIN users user ON court.created_by = user.id
+         WHERE court.verified = $1`,
         [isVerified]
       );
 
@@ -167,7 +175,11 @@ export class CourtsController {
     try {
       // Query the database for all courts
       const result = await CourtsController.db.query(
-        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified, created_by FROM courts ORDER BY created_at DESC'
+        `SELECT court.id, court.name, court.address_line, court.city, court.state, court.zip_code, court.is_indoor, court.lights, court.sport, court.verified, court.created_by,
+                user.name as creator_name, user.email as creator_email
+         FROM courts court
+         LEFT JOIN users user ON court.created_by = user.id
+         ORDER BY court.created_at DESC`
       );
 
       // Return the courts array
@@ -226,7 +238,10 @@ export class CourtsController {
         UPDATE courts 
         SET ${updateFields.join(', ')} 
         WHERE id = $${paramIndex}
-        RETURNING id, name, address_line, city, state, zip_code, is_indoor, lights, sport, verified, created_by, created_at, updated_at
+        RETURNING court.id, court.name, court.address_line, court.city, court.state, court.zip_code, court.is_indoor, court.lights, court.sport, court.verified, court.created_by, court.created_at, court.updated_at,
+                user.name as creator_name, user.email as creator_email
+        FROM courts court
+        LEFT JOIN users user ON court.created_by = user.id
       `;
 
       const result = await CourtsController.db.query(query, values);
