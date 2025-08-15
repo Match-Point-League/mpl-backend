@@ -5,6 +5,7 @@ import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { fetchCourtsByVerifiedStatus } from '../utils/courtUtils';
 
 export class CourtsController {
 
@@ -126,6 +127,7 @@ export class CourtsController {
 
   /**
    * Retrieves all courts by verification status
+   * admin endpoint
    * @param req - Request with verification status in params
    * @param res - Express response object
    */
@@ -142,14 +144,11 @@ export class CourtsController {
       // Convert string parameter to boolean
       const isVerified = verified === 'true';
 
-      // Query the database for courts matching verification status
-      const result = await CourtsController.db.query(
-        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = $1',
-        [isVerified]
-      );
+      // Use utility function to fetch courts with creator information (admin endpoint)
+      const courts = await fetchCourtsByVerifiedStatus(isVerified, true);
 
-      // Return the courts array (already in PublicCourtResponse format)
-      res.status(200).json(ResponseService.createSuccessResponse(result.rows, 'Courts retrieved successfully'));
+      // Return the courts array
+      res.status(200).json(ResponseService.createSuccessResponse(courts, 'Courts retrieved successfully'));
 
     } catch (error) {
       console.error('Error retrieving courts by verification status:', error);
@@ -160,17 +159,18 @@ export class CourtsController {
 
   /**
    * Retrieves all verified courts only
+   * public endpoint
    * @param req - Request object
    * @param res - Express response object
    */
   public static async getVerifiedCourts(req: Request, res: Response): Promise<void> {
     try {
-      // Create a mock request object with verified=true for the existing method
-      const mockReq = { query: { verified: 'true' } } as unknown as Request;
-      
-      // Call the existing method with the mock request
-      await CourtsController.getCourtsByVerified(mockReq, res);
-      
+      // Use utility function to fetch verified courts without creator information (public endpoint)
+      const courts = await fetchCourtsByVerifiedStatus(true, false);
+
+      // Return the courts array
+      res.status(200).json(ResponseService.createSuccessResponse(courts, 'Verified courts retrieved successfully'));
+
     } catch (error) {
       console.error('Error retrieving verified courts:', error);
       const response = ResponseService.createErrorResponse('Failed to retrieve verified courts', 500);
@@ -180,6 +180,7 @@ export class CourtsController {
 
   /**
    * Retrieves a specific verified court by ID
+   * public endpoint
    * @param req - Request with court ID in params
    * @param res - Express response object
    */
