@@ -179,6 +179,43 @@ export class CourtsController {
   }
 
   /**
+   * Retrieves a specific verified court by ID
+   * @param req - Request with court ID in params
+   * @param res - Express response object
+   */
+  public static async getVerifiedCourtById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      // Validate that ID parameter exists
+      if (!id) {
+        res.status(400).json(ResponseService.createErrorResponse('Court ID is required', 400));
+        return;
+      }
+
+      // Query the database for the verified court
+      const result = await CourtsController.db.query(
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE id = $1 AND verified = true',
+        [id]
+      );
+
+      // Check if verified court was found
+      if (result.rows.length === 0) {
+        res.status(404).json(ResponseService.createErrorResponse('Verified court not found', 404));
+        return;
+      }
+
+      // Return the verified court data
+      res.status(200).json(ResponseService.createSuccessResponse(result.rows[0], 'Verified court retrieved successfully'));
+
+    } catch (error) {
+      console.error('Error retrieving verified court:', error);
+      const response = ResponseService.createErrorResponse('Failed to retrieve verified court', 500);
+      res.status(500).json(response);
+    }
+  }
+
+  /**
    * Updates an existing court
    * @param req - The authenticated request object with court update data
    * @param res - The response object

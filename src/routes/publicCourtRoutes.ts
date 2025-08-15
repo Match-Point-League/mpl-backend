@@ -9,7 +9,10 @@ const router = Router();
  * No authentication required
  */
 
-// GET /api/v1/public/courts/verified-only - Get all verified courts
+// GET /api/v1/public/courts/verified - Get all verified courts
 router.get('/verified', CourtsController.getOnlyVerifiedCourts);
+
+// GET /api/v1/public/courts/:id - Get verified court by ID
+router.get('/:id', CourtsController.getVerifiedCourtById);
 
 export default router;
