@@ -35,6 +35,7 @@ export type User = {
   role: UserRole;
   created_at: Date;
   updated_at: Date;
+  is_deleted: boolean;
 }
 
 export type UserProfile = {
