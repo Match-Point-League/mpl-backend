@@ -172,4 +172,55 @@ export class UsersController {
       res.status(500).json(response);
     }
   }
+
+  public static async deleteUser(req: AuthenticatedRequest, res: Response): Promise<void> {
+    // Validate that the authenticated user's email is verified
+    if (!req.user?.emailVerified) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Access denied: Email must be verified',
+        timestamp: new Date().toISOString(),
+      };
+      res.status(403).json(response);
+      return;
+    }
+
+    try {
+      // Update the user profile
+      const query = `
+        UPDATE users 
+        SET is_deleted = true 
+        WHERE email = $1
+        RETURNING id, is_deleted
+      `;
+      const result = await UsersController.db.query(query, [req.user.email]);
+
+      // Check if the user was deleted successfully
+      if (result.rows.length === 0 || !result.rows[0].is_deleted) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'User not found',
+          timestamp: new Date().toISOString(),
+        };
+        res.status(404).json(response);
+        return;
+      }
+
+      // Return the success message
+      const response: ApiResponse = {
+        success: true,
+        message: 'User deleted successfully',
+        timestamp: new Date().toISOString(),
+      };
+      res.json(response);
+    } catch (error) {
+      console.error('Delete user error:', error);
+      const response: ApiResponse = {
+        success: false,
+        error: 'Failed to delete user',
+        timestamp: new Date().toISOString(),
+      };
+      res.status(500).json(response);
+    }
+  }
 }
