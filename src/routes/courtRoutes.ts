@@ -14,8 +14,4 @@ const router = Router();
 // Authenticated endpoint
 router.post('/', authenticateToken, CourtsController.createCourt);
 
-// PUT /api/v1/courts/update-court/:id - Update existing court
-// Admin only endpoint
-router.put('/update-court/:id', authenticateToken, requireAdminRole, CourtsController.updateCourt);
-
 export default router;
