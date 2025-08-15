@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse } from '../types';
+import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse, PublicCourtResponse } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
@@ -99,10 +99,22 @@ export class CourtController {
       );
 
       // Return success response with the created court
+      const responseData: PublicCourtResponse = {
+        id: result.rows[0].id,
+        name: result.rows[0].name,
+        address_line: result.rows[0].address_line,
+        city: result.rows[0].city,
+        state: result.rows[0].state,
+        zip_code: result.rows[0].zip_code,
+        is_indoor: result.rows[0].is_indoor,
+        lights: result.rows[0].lights,
+        sport: result.rows[0].sport
+      };
+
       res.status(201).json({
         success: true,
         message: 'Court created successfully',
-        data: result.rows[0],
+        data: responseData,
         timestamp: new Date().toISOString(),
       });
 
