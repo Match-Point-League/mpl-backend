@@ -4,6 +4,7 @@ import usersRoutes from './usersRoutes';
 import authRoutes from './authRoutes';
 import publicUserRoutes from './publicUserRoutes';
 import courtRoutes from './courtRoutes';
+import adminCourtRoutes from './adminCourtRoutes';
 
 const router = Router();
 
@@ -24,6 +25,10 @@ router.use('/users', usersRoutes);
 
 // Courts routes (authenticated)
 router.use('/courts', courtRoutes);
+
+// Admin routes
+// Court routes 
+router.use('/admin/courts', adminCourtRoutes);
 
 // Public routes
 // Players routes
