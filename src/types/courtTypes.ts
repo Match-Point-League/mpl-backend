@@ -84,3 +84,15 @@ export interface CourtValidationResult {
     sport?: string;
   };
 }
+
+export interface PublicCourtResponse {
+  id: string;
+  name: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  is_indoor: boolean;
+  lights?: boolean;
+  sport: SportOptions;
+}
