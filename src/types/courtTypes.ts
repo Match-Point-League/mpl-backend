@@ -16,7 +16,7 @@ export interface Court {
   state: string;
   zip_code: string;
   is_indoor: boolean;
-  lights?: boolean; // Only applies to outdoor courts; null if indoor
+  lights?: boolean; 
   sport: SportOptions;
   verified: boolean;
   created_by: string;

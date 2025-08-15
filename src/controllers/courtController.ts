@@ -69,7 +69,7 @@ export class CourtController {
         state: courtData.state,
         zip_code: courtData.zip_code,
         is_indoor: courtData.is_indoor,
-        lights: courtData.is_indoor ? undefined : courtData.lights, // Set lights to undefined for indoor courts
+        lights: courtData.is_indoor ? true : courtData.lights, // Set lights to true for indoor courts
         sport: courtData.sport as SportOptions, 
         verified: false, // Default to false
         created_by: req.user!.uid,

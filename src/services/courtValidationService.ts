@@ -28,8 +28,8 @@ export class CourtValidationService {
    * @returns Error message if validation fails, undefined if valid
    */
   private static validateLightsField(isIndoor: boolean, lights: boolean | undefined): string | undefined {
-    if (isIndoor && lights !== undefined) {
-      return 'Lights field is not applicable for indoor courts';
+    if (isIndoor && lights === false) {
+      return 'Lights field cannot be false for indoor courts';
     }
     
     if (!isIndoor && (lights === undefined || lights === null)) {
