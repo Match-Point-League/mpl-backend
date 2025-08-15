@@ -55,12 +55,6 @@ export class CourtController {
         return;
       }
 
-      // Add any warnings to the response (for future use with external validation)
-      if (validationResult.warnings.length > 0) {
-        // Log validation warnings (remove in production)
-        console.log('Court validation warnings:', validationResult.warnings);
-      }
-
       // Prepare court data for database insertion with defaults
       const insertData : CreateCourtInput = {
         name: courtData.name,

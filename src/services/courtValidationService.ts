@@ -42,11 +42,10 @@ export class CourtValidationService {
   /**
    * Validates court creation input data
    * @param courtData - The court data to validate
-   * @returns Validation result with errors and warnings
+   * @returns Validation result with errors
    */
   public static async validateCourtData(courtData: CourtsRequestInput): Promise<CourtValidationResult> {
     const errors: any = {};
-    const warnings: string[] = [];
 
     const nameError = validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH) ? undefined : 'Name must be 2-255 characters';
     if (nameError) errors.name = nameError;
@@ -97,6 +96,6 @@ export class CourtValidationService {
       }
     }
 
-    return { isValid: Object.keys(errors).length === 0, errors, warnings };
+    return { isValid: Object.keys(errors).length === 0, errors };
   }
 }
