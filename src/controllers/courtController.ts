@@ -55,6 +55,23 @@ export class CourtController {
         return;
       }
 
+      // Get PostgreSQL user ID from email
+      const userResult = await CourtController.db.query(
+        'SELECT id FROM users WHERE email = $1',
+        [req.user!.email]
+      );
+
+      if (userResult.rows.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: 'User not found in database',
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const id = userResult.rows[0].id;
+
       // Prepare court data for database insertion with defaults
       const insertData : CreateCourtInput = {
         name: courtData.name,
@@ -66,7 +83,7 @@ export class CourtController {
         lights: courtData.is_indoor ? true : courtData.lights, // Set lights to true for indoor courts
         sport: courtData.sport as SportOptions, 
         verified: false, // Default to false
-        created_by: req.user!.uid,
+        created_by: id,
       };
 
       // Insert court data into the database
