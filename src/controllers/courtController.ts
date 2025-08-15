@@ -21,7 +21,11 @@ export class CourtController {
     try {
       // Authentication check
       if (!req.user?.uid) {
-        res.status(401).json(ResponseService.createErrorResponse('User authentication required', 401));
+        res.status(401).json({
+          success: false,
+          error: 'User authentication required',
+          timestamp: new Date().toISOString(),
+        });
         return;
       }
 
@@ -42,7 +46,12 @@ export class CourtController {
       });
 
       if (!validationResult.isValid) {
-        res.status(400).json(ResponseService.createErrorResponse('Validation failed', 400, { validationErrors: validationResult.errors }));
+        res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          data: { validationErrors: validationResult.errors },
+          timestamp: new Date().toISOString(),
+        });
         return;
       }
 
@@ -79,7 +88,12 @@ export class CourtController {
       );
 
       // Return success response with the created court
-      res.status(201).json(ResponseService.createSuccessResponse(result.rows[0], 'Court created successfully'));
+      res.status(201).json({
+        success: true,
+        message: 'Court created successfully',
+        data: result.rows[0],
+        timestamp: new Date().toISOString(),
+      });
 
     } catch (error) {
       console.error('Error creating court:', error);
