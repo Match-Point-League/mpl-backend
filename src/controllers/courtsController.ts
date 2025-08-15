@@ -1,10 +1,11 @@
 import { Response, Request } from 'express';
-import { CourtsRequestInput, CreateCourtInput, Court, SportOptions, ApiResponse } from '../types';
+import { CourtsRequestInput, CreateCourtInput, SportOptions, UpdateCourtInput } from '../types';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { CourtValidationService } from '../services/courtValidationService';
 import { ResponseService } from '../services/responseService';
 import database from '../config/database';
 import { Pool } from 'pg';
+import { PublicCourtResponse } from '../types';
 
 export class CourtsController {
 
@@ -44,12 +45,6 @@ export class CourtsController {
       if (!validationResult.isValid) {
         res.status(400).json(ResponseService.createErrorResponse('Validation failed', 400, { validationErrors: validationResult.errors }));
         return;
-      }
-
-      // Add any warnings to the response (for future use with external validation)
-      if (validationResult.warnings.length > 0) {
-        // Log validation warnings (remove in production)
-        console.log('Court validation warnings:', validationResult.warnings);
       }
 
       // Prepare court data for database insertion with defaults
@@ -155,6 +150,68 @@ export class CourtsController {
       console.error('Error retrieving courts by verification status:', error);
       const response = ResponseService.createErrorResponse('Failed to retrieve courts', 500);
       res.status(500).json(response);
+    }
+  }
+
+  /**
+   * Updates an existing court
+   * @param req - The authenticated request object with court update data
+   * @param res - The response object
+   * @returns void
+   */
+  public static async updateCourt(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const updateData: UpdateCourtInput = req.body;
+
+    // Validate the update data
+    const validationResult = await CourtValidationService.validateCourtUpdateData(updateData);
+    if (!validationResult.isValid) {
+      res.status(400).json(ResponseService.createErrorResponse('Invalid update data', 400, { validationErrors: validationResult.errors }));
+      return;
+    }
+
+    try {
+      // Prepare the update fields and values
+      const updateFields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      for (const [field, value] of Object.entries(updateData)) {
+        if (value !== undefined) {
+          updateFields.push(`${field} = $${paramIndex++}`);
+          values.push(value);
+        }
+      }
+
+      // Validate that there are fields to update
+      if (updateFields.length === 0) {
+        res.status(400).json(ResponseService.createErrorResponse('No valid fields to update', 400));
+        return;
+      }
+
+      // Get court ID from request parameters
+      values.push(req.params.id);
+
+      // Update the court
+      const query = `
+        UPDATE courts 
+        SET ${updateFields.join(', ')} 
+        WHERE id = $${paramIndex}
+      `;
+
+      const result = await CourtsController.db.query(query, values);
+
+      // Check if the court was updated successfully using rowCount
+      if (result.rowCount === 0) {
+        res.status(404).json(ResponseService.createErrorResponse('Court not found', 404));
+        return;
+      }
+
+      // Return success confirmation
+      res.status(200).json(ResponseService.createSuccessResponse({ message: 'Court updated successfully' }, 'Court updated successfully'));
+
+    } catch (error) {
+      console.error('Update court error:', error);
+      res.status(500).json(ResponseService.createErrorResponse('Failed to update court', 500));
     }
   }
 }

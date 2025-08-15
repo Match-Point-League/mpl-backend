@@ -14,7 +14,7 @@ import {
   validateStateAgainstZipCode,
   VALIDATION_RULES
 } from '../utils/validation';
-import { CourtsRequestInput, CourtValidationResult } from '../types/courtTypes';
+import { CourtsRequestInput, CourtValidationResult, UpdateCourtInput } from '../types/courtTypes';
 
 /**
  * Service for validating court creation data
@@ -42,11 +42,10 @@ export class CourtValidationService {
   /**
    * Validates court creation input data
    * @param courtData - The court data to validate
-   * @returns Validation result with errors and warnings
+   * @returns Validation result with errors
    */
   public static async validateCourtData(courtData: CourtsRequestInput): Promise<CourtValidationResult> {
     const errors: any = {};
-    const warnings: string[] = [];
 
     const nameError = validateStringLength(courtData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH) ? undefined : 'Name must be 2-255 characters';
     if (nameError) errors.name = nameError;
@@ -97,6 +96,80 @@ export class CourtValidationService {
       }
     }
 
-    return { isValid: Object.keys(errors).length === 0, errors, warnings };
+    return { isValid: Object.keys(errors).length === 0, errors };
+  }
+
+  /**
+   * Validates court update data (partial updates)
+   * @param updateData - The court update data to validate
+   * @returns Validation result with errors
+   */
+  public static async validateCourtUpdateData(updateData: UpdateCourtInput): Promise<CourtValidationResult> {
+    const errors: any = {};
+
+    // Only validate fields that are provided
+    if (updateData.name) {
+      const nameError = validateStringLength(updateData.name, VALIDATION_RULES.MIN_NAME_LENGTH, VALIDATION_RULES.MAX_NAME_LENGTH) ? undefined : 'Name must be 2-255 characters';
+      if (nameError) errors.name = nameError;
+    }
+
+    if (updateData.address_line) {
+      const addressLineError = validateStringLength(updateData.address_line, VALIDATION_RULES.MIN_ADDRESS_LENGTH, VALIDATION_RULES.MAX_ADDRESS_LENGTH) ? undefined : 'Address must be 2-255 characters';
+      if (addressLineError) errors.address_line = addressLineError;
+
+      const addressFormatError = validateAddressFormat(updateData.address_line) ? undefined : 'Invalid address format';
+      if (addressFormatError) errors.address_line = addressFormatError;
+    }
+
+    if (updateData.city) {
+      const cityError = validateStringLength(updateData.city, 2, 100) ? undefined : 'City must be 2-100 characters';
+      if (cityError) errors.city = cityError;
+
+      const cityFormatError = validateCityFormat(updateData.city) ? undefined : 'Invalid city format';
+      if (cityFormatError) errors.city = cityFormatError;
+    }
+
+    if (updateData.state) {
+      const stateError = validateStringLength(updateData.state, 2, 2) ? undefined : 'State must be 2 characters';
+      if (stateError) errors.state = stateError;
+
+      const stateFormatError = validateState(updateData.state) ? undefined : 'Invalid state format';
+      if (stateFormatError) errors.state = stateFormatError;
+    }
+
+    if (updateData.zip_code) {
+      const zipCodeError = validateStringLength(updateData.zip_code, 5, 10) ? undefined : 'ZIP code must be 5-10 characters';
+      if (zipCodeError) errors.zip_code = zipCodeError;
+
+      const zipCodeFormatError = validateZipCodeFormat(updateData.zip_code) ? undefined : 'Invalid ZIP code format';
+      if (zipCodeFormatError) errors.zip_code = zipCodeFormatError;
+    }
+
+    if (updateData.sport) {
+      if (!updateData.sport.trim().length) {
+        errors.sport = 'Sport is required';
+      }
+    }
+
+    // Handle lights field logic for data integrity
+    if (updateData.is_indoor !== undefined) {
+      if (updateData.is_indoor === true) {
+        // Changing to indoor - lights not applicable, set to undefined
+        updateData.lights = undefined;
+      } else if (updateData.is_indoor === false && updateData.lights === undefined) {
+        // Changing to outdoor but no lights provided - set default to false
+        updateData.lights = false;
+      }
+    }
+
+    // Advanced validations (asynchronous) - only if state and zip_code are both provided
+    if (updateData.state && updateData.zip_code && Object.keys(errors).length === 0) {
+      const stateMatchesZipCode = await validateStateAgainstZipCode(updateData.state, updateData.zip_code);
+      if (!stateMatchesZipCode) {
+        errors.state = 'State does not match ZIP code';
+      }
+    }
+
+    return { isValid: Object.keys(errors).length === 0, errors };
   }
 }
