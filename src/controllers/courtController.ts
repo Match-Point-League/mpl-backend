@@ -163,7 +163,7 @@ export class CourtsController {
    * @param req - Request object
    * @param res - Express response object
    */
-  public static async getOnlyVerifiedCourts(req: Request, res: Response): Promise<void> {
+  public static async getVerifiedCourts(req: Request, res: Response): Promise<void> {
     try {
       // Create a mock request object with verified=true for the existing method
       const mockReq = { query: { verified: 'true' } } as unknown as Request;
