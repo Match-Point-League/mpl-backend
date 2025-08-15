@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { CourtsController } from '../controllers';
-import { authenticateToken, requireAdminRole } from '../middleware/authMiddleware';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -9,13 +9,9 @@ const router = Router();
  * Base path: /api/v1/courts
  * Authentication required
  */
+router.use(authenticateToken);
 
 // POST /api/v1/courts - Create new court
-// Authenticated endpoint
-router.post('/', authenticateToken, CourtsController.createCourt);
-
-// PUT /api/v1/courts/update-court/:id - Update existing court
-// Admin only endpoint
-router.put('/update-court/:id', authenticateToken, requireAdminRole, CourtsController.updateCourt);
+router.post('/', CourtsController.createCourt);
 
 export default router;
