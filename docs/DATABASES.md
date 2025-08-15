@@ -12,8 +12,10 @@
 - `city` (varchar(100), not null)
 - `zip_code` (varchar(10), not null)
 - `allow_direct_contact` (boolean, not null, default: false)
+- `role` (varchar(20), enum: 'player', 'admin', 'superadmin', not null, default: 'player')
 - `created_at` (timestamp with time zone, not null, default: now())
 - `updated_at` (timestamp with time zone, not null, default: now())
+- `is_deleted` (boolean, default: false)
 
 ## Matches table
 
