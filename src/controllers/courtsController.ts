@@ -159,6 +159,28 @@ export class CourtsController {
   }
 
   /**
+   * Retrieves all verified courts only
+   * @param req - Request object
+   * @param res - Express response object
+   */
+  public static async getOnlyVerifiedCourts(req: Request, res: Response): Promise<void> {
+    try {
+      // Query the database for only verified courts
+      const result = await CourtsController.db.query(
+        'SELECT id, name, address_line, city, state, zip_code, is_indoor, lights, sport FROM courts WHERE verified = true'
+      );
+
+      // Return the verified courts array
+      res.status(200).json(ResponseService.createSuccessResponse(result.rows, 'Verified courts retrieved successfully'));
+
+    } catch (error) {
+      console.error('Error retrieving verified courts:', error);
+      const response = ResponseService.createErrorResponse('Failed to retrieve verified courts', 500);
+      res.status(500).json(response);
+    }
+  }
+
+  /**
    * Updates an existing court
    * @param req - The authenticated request object with court update data
    * @param res - The response object
